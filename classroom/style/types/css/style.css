@@ -1,0 +1,32 @@
+/* element selector: selects all elements of a given type (p, h1, etc) */
+/* inheritance */
+body {
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  text-align: center;
+}
+
+p,
+h1 {
+  color: red;
+}
+
+/* id selector: selects the element with a given id (#id-name) */
+#highlight-paragraph {
+  color: green;
+}
+
+/* class selector: selects all elements with a given class (.class-name) */
+.text-bold {
+  font-weight: bold;
+}
+
+.text-italic {
+  font-style: italic;
+}
+
+.text-center {
+  text-align: center;
+}
