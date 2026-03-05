@@ -1,0 +1,26 @@
+/*
+o texto do h1 estar centralizado (align center), na cor branca (color white), com font-size igual 16px e com background-color gray.
+os elementos com a classe “texto” devem ter a color red.
+os elementos com a classe “italico” devem estar em itálico (font-style italic).
+Apenas na palavra “também”, mude sua color (blue) e o font-weight (bold). Use o elemento para isolar a palavra.
+*/
+
+h1 {
+  text-align: center;
+  color: white;
+  font-size: 16px;
+  background-color: gray;
+}
+
+.texto {
+  color: red;
+}
+
+.italico {
+  font-style: italic;
+}
+
+span {
+  color: blue;
+  font-weight: bold;
+}
