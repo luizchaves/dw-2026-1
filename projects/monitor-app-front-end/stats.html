@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Host Monitor — Estatísticas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body class="bg-gray-50 text-gray-800 min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-200 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-6">
+          <a href="dashboard.html" class="flex items-center gap-2">
+            <i data-lucide="activity" class="w-7 h-7 text-indigo-600"></i>
+            <span class="text-xl font-bold text-gray-900">Host Monitor</span>
+          </a>
+          <div class="hidden sm:flex items-center gap-1">
+            <a href="dashboard.html" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">Dashboard</a>
+            <a href="stats.html" class="px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg">Estatísticas</a>
+            <a href="incidents.html" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">Incidentes</a>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <!-- Avatar Dropdown -->
+          <div class="relative">
+            <button
+              id="avatar-btn"
+              class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 transition"
+            >
+              <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-medium">JS</div>
+              <span class="hidden sm:block text-sm text-gray-700">João</span>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+            <div
+              id="avatar-menu"
+              class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+            >
+              <div class="p-3 border-b border-gray-100">
+                <p class="text-sm font-medium text-gray-900">João Silva</p>
+                <p class="text-xs text-gray-500">joao@mail.com</p>
+              </div>
+              <div class="p-1">
+                <a
+                  href="login.html"
+                  class="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition"
+                >
+                  <i data-lucide="log-out" class="w-4 h-4"></i>
+                  Sair
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <!-- Título -->
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Estatísticas Globais</h1>
+        <p class="text-sm text-gray-500 mt-1">Visão consolidada de todos os hosts monitorados</p>
+      </div>
+
+      <!-- Seletor de Período -->
+      <section class="bg-white rounded-lg border border-gray-200 p-4">
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-gray-500 mr-2">Período:</span>
+          <button class="px-3 py-1.5 text-sm rounded-lg border border-gray-300 hover:bg-gray-100 transition">1h</button>
+          <button class="px-3 py-1.5 text-sm rounded-lg border border-gray-300 hover:bg-gray-100 transition">6h</button>
+          <button class="px-3 py-1.5 text-sm rounded-lg bg-indigo-600 text-white border border-indigo-600">24h</button>
+          <button class="px-3 py-1.5 text-sm rounded-lg border border-gray-300 hover:bg-gray-100 transition">7d</button>
+          <button class="px-3 py-1.5 text-sm rounded-lg border border-gray-300 hover:bg-gray-100 transition">30d</button>
+        </div>
+      </section>
+
+      <!-- Cards de Resumo -->
+      <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+          <p class="text-xs text-gray-500 mb-1">Total de Hosts</p>
+          <p class="text-2xl font-bold text-gray-900">12</p>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+          <p class="text-xs text-gray-500 mb-1">Online Agora</p>
+          <p class="text-2xl font-bold text-green-600">10</p>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+          <p class="text-xs text-gray-500 mb-1">Offline Agora</p>
+          <p class="text-2xl font-bold text-red-600">2</p>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+          <p class="text-xs text-gray-500 mb-1">Uptime Médio</p>
+          <p class="text-2xl font-bold text-green-600">97.4%</p>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+          <p class="text-xs text-gray-500 mb-1">Latência Média</p>
+          <p class="text-2xl font-bold text-gray-900">24ms</p>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+          <p class="text-xs text-gray-500 mb-1">Total de Incidentes</p>
+          <p class="text-2xl font-bold text-red-600">8</p>
+        </div>
+      </section>
+
+      <!-- Gráficos -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Disponibilidade Geral -->
+        <section class="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-5 h-5 text-indigo-600"></i>
+            Disponibilidade por Host
+          </h2>
+          <div class="bg-gray-50 border border-dashed border-gray-300 rounded-lg h-56 flex items-center justify-center text-gray-400">
+            <div class="text-center">
+              <i data-lucide="pie-chart" class="w-10 h-10 mx-auto mb-2"></i>
+              <p class="text-sm">Gráfico de pizza (Chart.js)</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Latência Média Comparativa -->
+        <section class="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-600"></i>
+            Latência Média por Host
+          </h2>
+          <div class="bg-gray-50 border border-dashed border-gray-300 rounded-lg h-56 flex items-center justify-center text-gray-400">
+            <div class="text-center">
+              <i data-lucide="bar-chart-3" class="w-10 h-10 mx-auto mb-2"></i>
+              <p class="text-sm">Gráfico de barras (Chart.js)</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Incidentes ao Longo do Tempo -->
+        <section class="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <i data-lucide="trending-down" class="w-5 h-5 text-red-500"></i>
+            Incidentes ao Longo do Tempo
+          </h2>
+          <div class="bg-gray-50 border border-dashed border-gray-300 rounded-lg h-56 flex items-center justify-center text-gray-400">
+            <div class="text-center">
+              <i data-lucide="trending-down" class="w-10 h-10 mx-auto mb-2"></i>
+              <p class="text-sm">Gráfico de linha (Chart.js)</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Latência Geral ao Longo do Tempo -->
+        <section class="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <i data-lucide="trending-up" class="w-5 h-5 text-indigo-600"></i>
+            Latência Geral ao Longo do Tempo
+          </h2>
+          <div class="bg-gray-50 border border-dashed border-gray-300 rounded-lg h-56 flex items-center justify-center text-gray-400">
+            <div class="text-center">
+              <i data-lucide="trending-up" class="w-10 h-10 mx-auto mb-2"></i>
+              <p class="text-sm">Gráfico de linha (Chart.js)</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Ranking de Hosts -->
+      <section class="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <i data-lucide="trophy" class="w-5 h-5 text-amber-500"></i>
+          Ranking de Hosts
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-200 text-left text-gray-500">
+                <th class="pb-3 font-medium">#</th>
+                <th class="pb-3 font-medium">Host</th>
+                <th class="pb-3 font-medium">Endereço</th>
+                <th class="pb-3 font-medium">Uptime</th>
+                <th class="pb-3 font-medium">Latência Média</th>
+                <th class="pb-3 font-medium">Falhas</th>
+                <th class="pb-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr>
+                <td class="py-3 font-medium text-gray-700">1</td>
+                <td class="py-3 font-medium text-gray-900">Gateway</td>
+                <td class="py-3 text-gray-500 font-mono">10.0.0.1</td>
+                <td class="py-3 text-green-600 font-medium">100%</td>
+                <td class="py-3 text-gray-700">3ms</td>
+                <td class="py-3 text-gray-700">0</td>
+                <td class="py-3">
+                  <span class="inline-flex items-center gap-1 text-xs font-medium bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                    Online
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 font-medium text-gray-700">2</td>
+                <td class="py-3 font-medium text-gray-900">DNS Server</td>
+                <td class="py-3 text-gray-500 font-mono">8.8.8.8</td>
+                <td class="py-3 text-green-600 font-medium">99.9%</td>
+                <td class="py-3 text-gray-700">22ms</td>
+                <td class="py-3 text-gray-700">0</td>
+                <td class="py-3">
+                  <span class="inline-flex items-center gap-1 text-xs font-medium bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                    Online
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 font-medium text-gray-700">3</td>
+                <td class="py-3 font-medium text-gray-900">Servidor Web</td>
+                <td class="py-3 text-gray-500 font-mono">192.168.0.1</td>
+                <td class="py-3 text-green-600 font-medium">99.8%</td>
+                <td class="py-3 text-gray-700">12ms</td>
+                <td class="py-3 text-gray-700">1</td>
+                <td class="py-3">
+                  <span class="inline-flex items-center gap-1 text-xs font-medium bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                    Online
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 font-medium text-gray-700">4</td>
+                <td class="py-3 font-medium text-gray-900">API REST</td>
+                <td class="py-3 text-gray-500 font-mono">api.example.com</td>
+                <td class="py-3 text-green-600 font-medium">99.2%</td>
+                <td class="py-3 text-gray-700">45ms</td>
+                <td class="py-3 text-gray-700">2</td>
+                <td class="py-3">
+                  <span class="inline-flex items-center gap-1 text-xs font-medium bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                    Online
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 font-medium text-gray-700">5</td>
+                <td class="py-3 font-medium text-gray-900">DB Principal</td>
+                <td class="py-3 text-gray-500 font-mono">10.0.0.5</td>
+                <td class="py-3 text-amber-600 font-medium">94.1%</td>
+                <td class="py-3 text-gray-700">38ms</td>
+                <td class="py-3 text-gray-700">3</td>
+                <td class="py-3">
+                  <span class="inline-flex items-center gap-1 text-xs font-medium bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                    <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                    Offline
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 font-medium text-gray-700">6</td>
+                <td class="py-3 font-medium text-gray-900">SMTP Server</td>
+                <td class="py-3 text-gray-500 font-mono">mail.example.com</td>
+                <td class="py-3 text-red-600 font-medium">87.3%</td>
+                <td class="py-3 text-gray-700">65ms</td>
+                <td class="py-3 text-gray-700">5</td>
+                <td class="py-3">
+                  <span class="inline-flex items-center gap-1 text-xs font-medium bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                    <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                    Offline
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      lucide.createIcons();
+
+      const avatarBtn = document.getElementById('avatar-btn');
+      const avatarMenu = document.getElementById('avatar-menu');
+      avatarBtn.addEventListener('click', () => avatarMenu.classList.toggle('hidden'));
+      document.addEventListener('click', (e) => {
+        if (!avatarBtn.contains(e.target) && !avatarMenu.contains(e.target)) {
+          avatarMenu.classList.add('hidden');
+        }
+      });
+    </script>
+  </body>
+</html>

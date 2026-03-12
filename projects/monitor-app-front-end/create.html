@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Host Monitor — Novo Host</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body class="bg-gray-50 text-gray-800 min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-200 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-6">
+          <a href="dashboard.html" class="flex items-center gap-2">
+            <i data-lucide="activity" class="w-7 h-7 text-indigo-600"></i>
+            <span class="text-xl font-bold text-gray-900">Host Monitor</span>
+          </a>
+          <div class="hidden sm:flex items-center gap-1">
+            <a href="dashboard.html" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">Dashboard</a>
+            <a href="stats.html" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">Estatísticas</a>
+            <a href="incidents.html" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">Incidentes</a>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <!-- Avatar Dropdown -->
+          <div class="relative">
+            <button
+              id="avatar-btn"
+              class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 transition"
+            >
+              <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-medium">JS</div>
+              <span class="hidden sm:block text-sm text-gray-700">João</span>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+            <div
+              id="avatar-menu"
+              class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+            >
+              <div class="p-3 border-b border-gray-100">
+                <p class="text-sm font-medium text-gray-900">João Silva</p>
+                <p class="text-xs text-gray-500">joao@mail.com</p>
+              </div>
+              <div class="p-1">
+                <a
+                  href="login.html"
+                  class="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition"
+                >
+                  <i data-lucide="log-out" class="w-4 h-4"></i>
+                  Sair
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-2xl mx-auto px-4 py-8">
+      <div class="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="bg-indigo-100 p-2 rounded-lg">
+            <i data-lucide="plus-circle" class="w-6 h-6 text-indigo-600"></i>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900">Novo Host</h1>
+        </div>
+
+        <form class="space-y-5" action="#" method="post">
+          <!-- Nome -->
+          <div class="space-y-1">
+            <label for="name" class="block text-sm font-medium text-gray-700">
+              Nome <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              placeholder="Ex.: Servidor Web"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <!-- Endereço -->
+          <div class="space-y-1">
+            <label for="address" class="block text-sm font-medium text-gray-700">
+              Endereço (IP ou domínio) <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              required
+              placeholder="Ex.: 192.168.0.1 ou example.com"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2.5 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <!-- Tags -->
+          <div class="space-y-1">
+            <label for="tags" class="block text-sm font-medium text-gray-700">Tags</label>
+            <input
+              type="text"
+              id="tags"
+              name="tags"
+              placeholder="Ex.: produção, web, api (separadas por vírgula)"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+            <p class="text-xs text-gray-400">Separe as tags por vírgula</p>
+          </div>
+
+          <!-- Intervalo -->
+          <div class="space-y-1">
+            <label for="interval" class="block text-sm font-medium text-gray-700">Intervalo de verificação (minutos)</label>
+            <input
+              type="number"
+              id="interval"
+              name="interval"
+              min="1"
+              max="1440"
+              value="5"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <!-- Ativo -->
+          <div class="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="active"
+              name="active"
+              checked
+              class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+            />
+            <label for="active" class="text-sm font-medium text-gray-700">Monitoramento ativo</label>
+          </div>
+
+          <!-- Botões -->
+          <div class="flex items-center gap-3 pt-4 border-t border-gray-200">
+            <button
+              type="submit"
+              class="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium"
+            >
+              <i data-lucide="save" class="w-4 h-4"></i>
+              Cadastrar Host
+            </button>
+            <a
+              href="dashboard.html"
+              class="inline-flex items-center gap-2 border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-100 transition"
+            >
+              Cancelar
+            </a>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      lucide.createIcons();
+
+      const avatarBtn = document.getElementById('avatar-btn');
+      const avatarMenu = document.getElementById('avatar-menu');
+      avatarBtn.addEventListener('click', () => avatarMenu.classList.toggle('hidden'));
+      document.addEventListener('click', (e) => {
+        if (!avatarBtn.contains(e.target) && !avatarMenu.contains(e.target)) {
+          avatarMenu.classList.add('hidden');
+        }
+      });
+    </script>
+  </body>
+</html>

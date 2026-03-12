@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Host Monitor — Monitoramento de Hosts em Tempo Real</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body class="bg-white text-gray-800">
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-2">
+          <i data-lucide="activity" class="w-7 h-7 text-indigo-600"></i>
+          <span class="text-xl font-bold text-gray-900">Host Monitor</span>
+        </a>
+        <div class="flex items-center gap-3">
+          <a href="login.html" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 transition">Entrar</a>
+          <a href="signup.html" class="px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">Criar conta</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-purple-50"></div>
+      <div class="relative max-w-7xl mx-auto px-4 py-24 sm:py-32 text-center">
+        <div class="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 text-sm font-medium px-4 py-1.5 rounded-full mb-6">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Monitoramento em tempo real
+        </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight max-w-3xl mx-auto">
+          Monitore seus hosts com <span class="text-indigo-600">simplicidade</span> e <span class="text-indigo-600">precisão</span>
+        </h1>
+        <p class="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
+          Acompanhe a disponibilidade e latência de servidores, APIs e dispositivos de rede. Receba alertas instantâneos e visualize estatísticas detalhadas.
+        </p>
+        <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="signup.html" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-3.5 rounded-lg hover:bg-indigo-700 transition text-base font-semibold shadow-lg shadow-indigo-200">
+            Começar gratuitamente
+            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+          </a>
+          <a href="#features" class="inline-flex items-center gap-2 text-gray-700 px-8 py-3.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition text-base font-medium">
+            Conhecer recursos
+          </a>
+        </div>
+        <!-- Preview mockup -->
+        <div class="mt-16 max-w-4xl mx-auto bg-white rounded-xl border border-gray-200 shadow-2xl shadow-gray-200/50 overflow-hidden">
+          <div class="bg-gray-100 px-4 py-2 flex items-center gap-2 border-b border-gray-200">
+            <span class="w-3 h-3 bg-red-400 rounded-full"></span>
+            <span class="w-3 h-3 bg-yellow-400 rounded-full"></span>
+            <span class="w-3 h-3 bg-green-400 rounded-full"></span>
+            <span class="ml-4 text-xs text-gray-400 font-mono">host-monitor.app/dashboard</span>
+          </div>
+          <div class="p-6 bg-gray-50">
+            <div class="grid grid-cols-3 gap-3 mb-4">
+              <div class="bg-white rounded-lg border border-gray-200 p-3 text-center">
+                <p class="text-xs text-gray-500">Total</p>
+                <p class="text-xl font-bold">12</p>
+              </div>
+              <div class="bg-white rounded-lg border border-gray-200 p-3 text-center">
+                <p class="text-xs text-gray-500">Online</p>
+                <p class="text-xl font-bold text-green-600">10</p>
+              </div>
+              <div class="bg-white rounded-lg border border-gray-200 p-3 text-center">
+                <p class="text-xs text-gray-500">Offline</p>
+                <p class="text-xl font-bold text-red-600">2</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+              <div class="bg-white rounded-lg border border-gray-200 p-3">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-medium">Servidor Web</span>
+                  <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                </div>
+                <p class="text-xs text-gray-500 font-mono">192.168.0.1</p>
+                <p class="text-xs text-gray-400 mt-1">12ms · 99.8%</p>
+              </div>
+              <div class="bg-white rounded-lg border border-gray-200 p-3">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-medium">API REST</span>
+                  <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                </div>
+                <p class="text-xs text-gray-500 font-mono">api.example.com</p>
+                <p class="text-xs text-gray-400 mt-1">45ms · 99.2%</p>
+              </div>
+              <div class="bg-white rounded-lg border border-red-200 p-3">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-medium">DB Principal</span>
+                  <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                </div>
+                <p class="text-xs text-gray-500 font-mono">10.0.0.5</p>
+                <p class="text-xs text-gray-400 mt-1">— · 94.1%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-20 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Tudo que você precisa para monitorar</h2>
+          <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Recursos completos para manter seus serviços sempre disponíveis.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Feature 1 -->
+          <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition">
+            <div class="bg-indigo-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <i data-lucide="monitor-check" class="w-6 h-6 text-indigo-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Dashboard em Tempo Real</h3>
+            <p class="text-gray-600 text-sm">Visualize o status de todos os seus hosts em um painel centralizado com atualização automática.</p>
+          </div>
+          <!-- Feature 2 -->
+          <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition">
+            <div class="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <i data-lucide="bar-chart-3" class="w-6 h-6 text-green-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Estatísticas Detalhadas</h3>
+            <p class="text-gray-600 text-sm">Gráficos de latência, uptime e disponibilidade com filtros por período personalizável.</p>
+          </div>
+          <!-- Feature 3 -->
+          <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition">
+            <div class="bg-red-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <i data-lucide="bell-ring" class="w-6 h-6 text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Alertas de Incidentes</h3>
+            <p class="text-gray-600 text-sm">Receba notificações imediatas quando um host ficar indisponível ou a latência ultrapassar o limite.</p>
+          </div>
+          <!-- Feature 4 -->
+          <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition">
+            <div class="bg-amber-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <i data-lucide="history" class="w-6 h-6 text-amber-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Histórico Completo</h3>
+            <p class="text-gray-600 text-sm">Acesse o log de todas as verificações realizadas com paginação, filtros e exportação CSV.</p>
+          </div>
+          <!-- Feature 5 -->
+          <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition">
+            <div class="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <i data-lucide="shield-alert" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Análise de Incidentes</h3>
+            <p class="text-gray-600 text-sm">Identifique padrões de falha, hosts mais afetados e tempo médio de resolução (MTTR).</p>
+          </div>
+          <!-- Feature 6 -->
+          <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition">
+            <div class="bg-cyan-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <i data-lucide="tags" class="w-6 h-6 text-cyan-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Organização por Tags</h3>
+            <p class="text-gray-600 text-sm">Agrupe hosts com tags personalizadas e filtre rapidamente por categorias como produção, API ou rede.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Como Funciona -->
+    <section class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Como funciona</h2>
+          <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Três passos simples para começar a monitorar.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl font-bold text-indigo-600">1</span>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Cadastre seus hosts</h3>
+            <p class="text-gray-600 text-sm">Adicione servidores, APIs ou dispositivos informando o IP ou domínio e configure tags para organização.</p>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl font-bold text-indigo-600">2</span>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Configure o intervalo</h3>
+            <p class="text-gray-600 text-sm">Defina a frequência de verificação (1, 5, 15 minutos) e ative o monitoramento automático via ICMP Ping.</p>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl font-bold text-indigo-600">3</span>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Acompanhe em tempo real</h3>
+            <p class="text-gray-600 text-sm">Visualize status, latência e uptime no dashboard. Receba alertas instantâneos quando algo sair do ar.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Social Proof / Números -->
+    <section class="py-20 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Confiado por equipes de infraestrutura</h2>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+          <div>
+            <p class="text-4xl font-extrabold text-indigo-600">500+</p>
+            <p class="mt-2 text-sm text-gray-600">Hosts monitorados</p>
+          </div>
+          <div>
+            <p class="text-4xl font-extrabold text-indigo-600">10k+</p>
+            <p class="mt-2 text-sm text-gray-600">Verificações por dia</p>
+          </div>
+          <div>
+            <p class="text-4xl font-extrabold text-indigo-600">99.9%</p>
+            <p class="mt-2 text-sm text-gray-600">Uptime da plataforma</p>
+          </div>
+          <div>
+            <p class="text-4xl font-extrabold text-indigo-600">&lt;1s</p>
+            <p class="mt-2 text-sm text-gray-600">Detecção de falhas</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screenshots / Demo -->
+    <section class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Veja o sistema em ação</h2>
+          <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Conheça as telas principais do Host Monitor.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Screenshot 1 -->
+          <div class="group">
+            <div class="bg-gray-100 rounded-xl border border-gray-200 overflow-hidden">
+              <div class="bg-gray-200 px-3 py-1.5 flex items-center gap-1.5 border-b border-gray-300">
+                <span class="w-2.5 h-2.5 bg-red-400 rounded-full"></span>
+                <span class="w-2.5 h-2.5 bg-yellow-400 rounded-full"></span>
+                <span class="w-2.5 h-2.5 bg-green-400 rounded-full"></span>
+              </div>
+              <div class="p-4 space-y-2">
+                <div class="flex items-center gap-2 mb-3">
+                  <i data-lucide="layout-dashboard" class="w-5 h-5 text-indigo-600"></i>
+                  <span class="text-sm font-semibold text-gray-700">Dashboard</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                  <div class="bg-white rounded p-2 text-center border border-gray-200">
+                    <p class="text-xs text-gray-400">Total</p>
+                    <p class="text-sm font-bold">12</p>
+                  </div>
+                  <div class="bg-white rounded p-2 text-center border border-gray-200">
+                    <p class="text-xs text-gray-400">Online</p>
+                    <p class="text-sm font-bold text-green-600">10</p>
+                  </div>
+                  <div class="bg-white rounded p-2 text-center border border-gray-200">
+                    <p class="text-xs text-gray-400">Offline</p>
+                    <p class="text-sm font-bold text-red-600">2</p>
+                  </div>
+                </div>
+                <div class="space-y-1.5">
+                  <div class="bg-white rounded p-2 border border-gray-200 flex justify-between items-center">
+                    <span class="text-xs font-medium">Servidor Web</span>
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                  </div>
+                  <div class="bg-white rounded p-2 border border-gray-200 flex justify-between items-center">
+                    <span class="text-xs font-medium">API REST</span>
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                  </div>
+                  <div class="bg-white rounded p-2 border border-red-200 flex justify-between items-center">
+                    <span class="text-xs font-medium">DB Principal</span>
+                    <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-center text-sm text-gray-500 mt-3 font-medium">Dashboard</p>
+          </div>
+          <!-- Screenshot 2 -->
+          <div class="group">
+            <div class="bg-gray-100 rounded-xl border border-gray-200 overflow-hidden">
+              <div class="bg-gray-200 px-3 py-1.5 flex items-center gap-1.5 border-b border-gray-300">
+                <span class="w-2.5 h-2.5 bg-red-400 rounded-full"></span>
+                <span class="w-2.5 h-2.5 bg-yellow-400 rounded-full"></span>
+                <span class="w-2.5 h-2.5 bg-green-400 rounded-full"></span>
+              </div>
+              <div class="p-4 space-y-2">
+                <div class="flex items-center gap-2 mb-3">
+                  <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-600"></i>
+                  <span class="text-sm font-semibold text-gray-700">Estatísticas</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="bg-white rounded p-2 text-center border border-gray-200">
+                    <p class="text-xs text-gray-400">Uptime</p>
+                    <p class="text-sm font-bold text-green-600">98.7%</p>
+                  </div>
+                  <div class="bg-white rounded p-2 text-center border border-gray-200">
+                    <p class="text-xs text-gray-400">Latência</p>
+                    <p class="text-sm font-bold">24ms</p>
+                  </div>
+                </div>
+                <div class="bg-white rounded p-2 border border-gray-200 h-20 flex items-end gap-1 px-2">
+                  <div class="bg-indigo-400 rounded-t w-full" style="height:40%"></div>
+                  <div class="bg-indigo-500 rounded-t w-full" style="height:65%"></div>
+                  <div class="bg-indigo-400 rounded-t w-full" style="height:50%"></div>
+                  <div class="bg-indigo-600 rounded-t w-full" style="height:80%"></div>
+                  <div class="bg-indigo-500 rounded-t w-full" style="height:55%"></div>
+                  <div class="bg-indigo-400 rounded-t w-full" style="height:35%"></div>
+                  <div class="bg-indigo-600 rounded-t w-full" style="height:70%"></div>
+                </div>
+                <div class="bg-white rounded p-2 border border-gray-200 h-12 flex items-center gap-1 px-2">
+                  <div class="bg-green-400 rounded h-3 flex-1"></div>
+                  <div class="bg-green-500 rounded h-3 flex-1"></div>
+                  <div class="bg-red-400 rounded h-3 w-4"></div>
+                  <div class="bg-green-400 rounded h-3 flex-1"></div>
+                </div>
+              </div>
+            </div>
+            <p class="text-center text-sm text-gray-500 mt-3 font-medium">Estatísticas</p>
+          </div>
+          <!-- Screenshot 3 -->
+          <div class="group">
+            <div class="bg-gray-100 rounded-xl border border-gray-200 overflow-hidden">
+              <div class="bg-gray-200 px-3 py-1.5 flex items-center gap-1.5 border-b border-gray-300">
+                <span class="w-2.5 h-2.5 bg-red-400 rounded-full"></span>
+                <span class="w-2.5 h-2.5 bg-yellow-400 rounded-full"></span>
+                <span class="w-2.5 h-2.5 bg-green-400 rounded-full"></span>
+              </div>
+              <div class="p-4 space-y-2">
+                <div class="flex items-center gap-2 mb-3">
+                  <i data-lucide="alert-triangle" class="w-5 h-5 text-indigo-600"></i>
+                  <span class="text-sm font-semibold text-gray-700">Incidentes</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="bg-white rounded p-2 text-center border border-gray-200">
+                    <p class="text-xs text-gray-400">Abertos</p>
+                    <p class="text-sm font-bold text-red-600">2</p>
+                  </div>
+                  <div class="bg-white rounded p-2 text-center border border-gray-200">
+                    <p class="text-xs text-gray-400">Resolvidos</p>
+                    <p class="text-sm font-bold text-green-600">6</p>
+                  </div>
+                </div>
+                <div class="space-y-1.5">
+                  <div class="bg-red-50 rounded p-2 border border-red-200 flex justify-between items-center">
+                    <span class="text-xs font-medium">DB Principal</span>
+                    <span class="text-xs text-red-600 font-medium">1h20m</span>
+                  </div>
+                  <div class="bg-red-50 rounded p-2 border border-red-200 flex justify-between items-center">
+                    <span class="text-xs font-medium">SMTP Server</span>
+                    <span class="text-xs text-red-600 font-medium">2h35m</span>
+                  </div>
+                  <div class="bg-white rounded p-2 border border-gray-200 flex justify-between items-center">
+                    <span class="text-xs font-medium">Servidor Web</span>
+                    <span class="text-xs text-green-600 font-medium">5min</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-center text-sm text-gray-500 mt-3 font-medium">Incidentes</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparativo Antes/Depois -->
+    <section class="py-20 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Antes vs. Depois</h2>
+          <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Veja a diferença que o monitoramento proativo faz na sua operação.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Antes -->
+          <div class="bg-white rounded-xl border-2 border-red-200 p-8">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="bg-red-100 w-10 h-10 rounded-full flex items-center justify-center">
+                <i data-lucide="x" class="w-5 h-5 text-red-600"></i>
+              </div>
+              <h3 class="text-xl font-bold text-red-700">Sem monitoramento</h3>
+            </div>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3 text-gray-600">
+                <i data-lucide="x-circle" class="w-5 h-5 text-red-400 mt-0.5 shrink-0"></i>
+                <span class="text-sm">Downtime descoberto por reclamações de clientes</span>
+              </li>
+              <li class="flex items-start gap-3 text-gray-600">
+                <i data-lucide="x-circle" class="w-5 h-5 text-red-400 mt-0.5 shrink-0"></i>
+                <span class="text-sm">Sem dados históricos para análise de causa raiz</span>
+              </li>
+              <li class="flex items-start gap-3 text-gray-600">
+                <i data-lucide="x-circle" class="w-5 h-5 text-red-400 mt-0.5 shrink-0"></i>
+                <span class="text-sm">Tempo médio de detecção: horas ou dias</span>
+              </li>
+              <li class="flex items-start gap-3 text-gray-600">
+                <i data-lucide="x-circle" class="w-5 h-5 text-red-400 mt-0.5 shrink-0"></i>
+                <span class="text-sm">Sem visibilidade sobre latência e performance</span>
+              </li>
+              <li class="flex items-start gap-3 text-gray-600">
+                <i data-lucide="x-circle" class="w-5 h-5 text-red-400 mt-0.5 shrink-0"></i>
+                <span class="text-sm">Verificações manuais e inconsistentes</span>
+              </li>
+            </ul>
+          </div>
+          <!-- Depois -->
+          <div class="bg-white rounded-xl border-2 border-green-200 p-8">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="bg-green-100 w-10 h-10 rounded-full flex items-center justify-center">
+                <i data-lucide="check" class="w-5 h-5 text-green-600"></i>
+              </div>
+              <h3 class="text-xl font-bold text-green-700">Com Host Monitor</h3>
+            </div>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3 text-gray-600">
+                <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mt-0.5 shrink-0"></i>
+                <span class="text-sm">Alertas automáticos em menos de 1 segundo</span>
+              </li>
+              <li class="flex items-start gap-3 text-gray-600">
+                <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mt-0.5 shrink-0"></i>
+                <span class="text-sm">Histórico completo de verificações e incidentes</span>
+              </li>
+              <li class="flex items-start gap-3 text-gray-600">
+                <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mt-0.5 shrink-0"></i>
+                <span class="text-sm">Detecção automática em tempo real 24/7</span>
+              </li>
+              <li class="flex items-start gap-3 text-gray-600">
+                <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mt-0.5 shrink-0"></i>
+                <span class="text-sm">Gráficos de latência, uptime e MTTR detalhados</span>
+              </li>
+              <li class="flex items-start gap-3 text-gray-600">
+                <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mt-0.5 shrink-0"></i>
+                <span class="text-sm">Monitoramento automático e confiável via ICMP</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Integrações -->
+    <section class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Integrações para notificações</h2>
+          <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Receba alertas onde sua equipe já trabalha.</p>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl mx-auto">
+          <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 flex flex-col items-center gap-3 hover:shadow-md transition">
+            <i data-lucide="mail" class="w-8 h-8 text-gray-700"></i>
+            <span class="text-sm font-medium text-gray-700">E-mail</span>
+          </div>
+          <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 flex flex-col items-center gap-3 hover:shadow-md transition">
+            <i data-lucide="message-square" class="w-8 h-8 text-indigo-600"></i>
+            <span class="text-sm font-medium text-gray-700">Slack</span>
+          </div>
+          <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 flex flex-col items-center gap-3 hover:shadow-md transition">
+            <i data-lucide="gamepad-2" class="w-8 h-8 text-indigo-500"></i>
+            <span class="text-sm font-medium text-gray-700">Discord</span>
+          </div>
+          <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 flex flex-col items-center gap-3 hover:shadow-md transition">
+            <i data-lucide="webhook" class="w-8 h-8 text-gray-700"></i>
+            <span class="text-sm font-medium text-gray-700">Webhooks</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Planos e Preços -->
+    <section class="py-20 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Planos e preços</h2>
+          <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Escolha o plano ideal para o tamanho da sua infraestrutura.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <!-- Gratuito -->
+          <div class="bg-white rounded-xl border border-gray-200 p-8 flex flex-col">
+            <h3 class="text-lg font-bold text-gray-900">Gratuito</h3>
+            <div class="mt-4 mb-6">
+              <span class="text-4xl font-extrabold text-gray-900">R$0</span>
+              <span class="text-gray-500 text-sm">/mês</span>
+            </div>
+            <ul class="space-y-3 mb-8 flex-1">
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Até 5 hosts
+              </li>
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Intervalo mínimo: 5 min
+              </li>
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Histórico de 7 dias
+              </li>
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Notificações por e-mail
+              </li>
+            </ul>
+            <a href="signup.html" class="block text-center border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition font-medium text-sm">
+              Começar grátis
+            </a>
+          </div>
+          <!-- Pro -->
+          <div class="bg-white rounded-xl border-2 border-indigo-600 p-8 flex flex-col relative">
+            <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full">Mais popular</span>
+            <h3 class="text-lg font-bold text-gray-900">Pro</h3>
+            <div class="mt-4 mb-6">
+              <span class="text-4xl font-extrabold text-gray-900">R$49</span>
+              <span class="text-gray-500 text-sm">/mês</span>
+            </div>
+            <ul class="space-y-3 mb-8 flex-1">
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Até 50 hosts
+              </li>
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Intervalo mínimo: 1 min
+              </li>
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Histórico de 90 dias
+              </li>
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Slack, Discord e Webhooks
+              </li>
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Exportação CSV
+              </li>
+            </ul>
+            <a href="signup.html" class="block text-center bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-medium text-sm">
+              Assinar Pro
+            </a>
+          </div>
+          <!-- Enterprise -->
+          <div class="bg-white rounded-xl border border-gray-200 p-8 flex flex-col">
+            <h3 class="text-lg font-bold text-gray-900">Enterprise</h3>
+            <div class="mt-4 mb-6">
+              <span class="text-4xl font-extrabold text-gray-900">R$149</span>
+              <span class="text-gray-500 text-sm">/mês</span>
+            </div>
+            <ul class="space-y-3 mb-8 flex-1">
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Hosts ilimitados
+              </li>
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Intervalo mínimo: 30s
+              </li>
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Histórico ilimitado
+              </li>
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Todas as integrações
+              </li>
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Status page pública
+              </li>
+              <li class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i>
+                Suporte prioritário
+              </li>
+            </ul>
+            <a href="signup.html" class="block text-center border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition font-medium text-sm">
+              Falar com vendas
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Depoimentos -->
+    <section class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">O que dizem nossos usuários</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="bg-gray-50 rounded-xl border border-gray-200 p-6">
+            <div class="flex items-center gap-1 mb-4">
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            </div>
+            <p class="text-gray-600 text-sm mb-6">"Antes do Host Monitor, a gente só descobria que o servidor caiu quando o cliente ligava reclamando. Agora recebemos alertas em segundos e resolvemos antes de impactar alguém."</p>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-medium">RM</div>
+              <div>
+                <p class="text-sm font-semibold text-gray-900">Rafael Mendes</p>
+                <p class="text-xs text-gray-500">SysAdmin — TechCorp</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 rounded-xl border border-gray-200 p-6">
+            <div class="flex items-center gap-1 mb-4">
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            </div>
+            <p class="text-gray-600 text-sm mb-6">"O dashboard é intuitivo e os gráficos de latência me ajudam a identificar padrões de degradação antes que se tornem problemas sérios. Ferramenta essencial para DevOps."</p>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white text-sm font-medium">AC</div>
+              <div>
+                <p class="text-sm font-semibold text-gray-900">Ana Costa</p>
+                <p class="text-xs text-gray-500">DevOps Lead — CloudBase</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 rounded-xl border border-gray-200 p-6">
+            <div class="flex items-center gap-1 mb-4">
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            </div>
+            <p class="text-gray-600 text-sm mb-6">"A análise de incidentes e o MTTR nos deram visibilidade real sobre a confiabilidade da nossa infra. Conseguimos reduzir o tempo de indisponibilidade em 70% no primeiro mês."</p>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">LS</div>
+              <div>
+                <p class="text-sm font-semibold text-gray-900">Lucas Souza</p>
+                <p class="text-xs text-gray-500">CTO — StartupFlow</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-20 bg-gray-50">
+      <div class="max-w-3xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Perguntas frequentes</h2>
+        </div>
+        <div class="space-y-4">
+          <details class="bg-white rounded-xl border border-gray-200 group" open>
+            <summary class="flex items-center justify-between px-6 py-4 cursor-pointer list-none">
+              <span class="font-medium text-gray-900">Quais protocolos de verificação são suportados?</span>
+              <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform group-open:rotate-180"></i>
+            </summary>
+            <div class="px-6 pb-4 text-sm text-gray-600">Atualmente o Host Monitor utiliza ICMP Ping para verificação de disponibilidade e medição de latência. Suporte a HTTP/HTTPS está no roadmap para futuras versões.</div>
+          </details>
+          <details class="bg-white rounded-xl border border-gray-200 group">
+            <summary class="flex items-center justify-between px-6 py-4 cursor-pointer list-none">
+              <span class="font-medium text-gray-900">Qual é o intervalo mínimo de verificação?</span>
+              <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform group-open:rotate-180"></i>
+            </summary>
+            <div class="px-6 pb-4 text-sm text-gray-600">Depende do seu plano: 5 minutos no Gratuito, 1 minuto no Pro e 30 segundos no Enterprise. Você pode configurar intervalos diferentes para cada host.</div>
+          </details>
+          <details class="bg-white rounded-xl border border-gray-200 group">
+            <summary class="flex items-center justify-between px-6 py-4 cursor-pointer list-none">
+              <span class="font-medium text-gray-900">Posso exportar os dados de verificação?</span>
+              <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform group-open:rotate-180"></i>
+            </summary>
+            <div class="px-6 pb-4 text-sm text-gray-600">Sim! Nos planos Pro e Enterprise, você pode exportar o histórico de verificações e incidentes em formato CSV com filtros por período e host.</div>
+          </details>
+          <details class="bg-white rounded-xl border border-gray-200 group">
+            <summary class="flex items-center justify-between px-6 py-4 cursor-pointer list-none">
+              <span class="font-medium text-gray-900">Como funcionam as notificações?</span>
+              <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform group-open:rotate-180"></i>
+            </summary>
+            <div class="px-6 pb-4 text-sm text-gray-600">Quando um host muda de status (online → offline ou vice-versa), o sistema envia uma notificação pelos canais configurados: e-mail, Slack, Discord ou webhooks personalizados.</div>
+          </details>
+          <details class="bg-white rounded-xl border border-gray-200 group">
+            <summary class="flex items-center justify-between px-6 py-4 cursor-pointer list-none">
+              <span class="font-medium text-gray-900">Posso compartilhar uma status page pública?</span>
+              <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform group-open:rotate-180"></i>
+            </summary>
+            <div class="px-6 pb-4 text-sm text-gray-600">Sim, no plano Enterprise você pode gerar uma status page pública para que seus clientes acompanhem a disponibilidade dos serviços em tempo real, sem precisar de login.</div>
+          </details>
+          <details class="bg-white rounded-xl border border-gray-200 group">
+            <summary class="flex items-center justify-between px-6 py-4 cursor-pointer list-none">
+              <span class="font-medium text-gray-900">O que é MTTR e como é calculado?</span>
+              <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform group-open:rotate-180"></i>
+            </summary>
+            <div class="px-6 pb-4 text-sm text-gray-600">MTTR (Mean Time To Resolution) é o tempo médio de resolução de incidentes. É calculado automaticamente com base na duração entre o momento que um host fica offline e quando volta ao ar.</div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-20 bg-indigo-600">
+      <div class="max-w-3xl mx-auto px-4 text-center">
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">Pronto para monitorar seus hosts?</h2>
+        <p class="mt-4 text-lg text-indigo-200">Crie sua conta em segundos e comece a acompanhar a saúde dos seus serviços.</p>
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="signup.html" class="inline-flex items-center gap-2 bg-white text-indigo-600 px-8 py-3.5 rounded-lg hover:bg-indigo-50 transition text-base font-semibold">
+            Criar conta grátis
+            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+          </a>
+          <a href="login.html" class="inline-flex items-center gap-2 text-white border border-indigo-400 px-8 py-3.5 rounded-lg hover:bg-indigo-700 transition text-base font-medium">
+            Já tenho conta
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400">
+      <div class="max-w-7xl mx-auto px-4">
+        <!-- Newsletter -->
+        <div class="py-12 border-b border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div>
+            <h3 class="text-lg font-semibold text-white">Fique por dentro das novidades</h3>
+            <p class="text-sm text-gray-400 mt-1">Receba dicas de monitoramento e atualizações do produto.</p>
+          </div>
+          <form class="flex gap-2 w-full sm:w-auto" onsubmit="return false;">
+            <input
+              type="email"
+              placeholder="seu@email.com"
+              class="px-4 py-2.5 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm flex-1 sm:w-64"
+            />
+            <button type="submit" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition text-sm font-medium whitespace-nowrap">
+              Inscrever-se
+            </button>
+          </form>
+        </div>
+        <!-- Bottom -->
+        <div class="py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="activity" class="w-5 h-5 text-indigo-400"></i>
+            <span class="text-sm font-semibold text-white">Host Monitor</span>
+          </div>
+          <p class="text-sm">&copy; 2026 Host Monitor. Todos os direitos reservados.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
