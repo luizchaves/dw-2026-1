@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canvas API</title>
+    <style>
+      canvas {
+        border: 1px solid #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Canvas API</h1>
+    <canvas id="canvas" width="600" height="400"></canvas>
+    <p>
+      Exemplos Chart.js:
+      <a href="https://www.chartjs.org/docs/latest/samples/information.html" target="_blank">
+        Chart.js Samples
+      </a>
+    </p>
+
+
+    <script>
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Retângulo preenchido
+      ctx.fillStyle = '#3498db';
+      ctx.fillRect(50, 50, 150, 100);
+
+      // Retângulo com borda
+      ctx.strokeStyle = '#e74c3c';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(250, 50, 150, 100);
+
+      // Círculo
+      ctx.beginPath();
+      ctx.arc(125, 250, 50, 0, Math.PI * 2);
+      ctx.fillStyle = '#2ecc71';
+      ctx.fill();
+
+      // Triângulo
+      ctx.beginPath();
+      ctx.moveTo(325, 200);
+      ctx.lineTo(275, 300);
+      ctx.lineTo(375, 300);
+      ctx.closePath();
+      ctx.fillStyle = '#f39c12';
+      ctx.fill();
+
+      // Linha
+      ctx.beginPath();
+      ctx.moveTo(450, 50);
+      ctx.lineTo(550, 150);
+      ctx.strokeStyle = '#9b59b6';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      // Texto
+      ctx.font = '24px Arial';
+      ctx.fillStyle = '#333';
+      ctx.fillText('Hello Canvas!', 420, 250);
+
+      // Texto com borda
+      ctx.font = '20px Arial';
+      ctx.strokeStyle = '#e74c3c';
+      ctx.strokeText('Stroke Text', 420, 290);
+    </script>
+  </body>
+</html>

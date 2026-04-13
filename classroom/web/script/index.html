@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Script</title>
+  <script src="js/lib/math.js"></script>
+  <script>
+    function hello(name) {
+      return `Hello, ${name}!`;
+    }
+
+    console.log(hello('Script Tag | Head'));
+    console.log(sum(2, 3));
+  </script>
+</head>
+<body>
+  <h1>Hello Script</h1>
+  <p id="content"></p>
+
+  <script>
+    console.log(hello('Script Tag | Body'));
+  </script>
+  <script type="module">
+    import { formatCurrency } from './js/lib/util.js';
+
+    console.log(formatCurrency(1234.56));
+  </script>
+  <script type="module" src="js/main.js"></script>
+  <script>
+    const content = document.getElementById('content');
+    content.textContent = 'This content was added by a script tag in the body.';
+  </script>
+</body>
+</html>

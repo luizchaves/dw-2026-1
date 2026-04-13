@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notification API</title>
+    <style>
+      button {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-right: 0.5rem;
+      }
+
+      #status {
+        margin-top: 1rem;
+        padding: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Notification API</h1>
+
+    <button id="permitBtn">Solicitar Permissão</button>
+    <button id="notifyBtn">Enviar Notificação</button>
+    <p id="status"></p>
+
+    <script>
+      const permitBtn = document.querySelector('#permitBtn');
+      const notifyBtn = document.querySelector('#notifyBtn');
+      const status = document.querySelector('#status');
+
+      function updateStatus() {
+        status.textContent = `Permissão atual: ${Notification.permission}`;
+      }
+
+      updateStatus();
+
+      permitBtn.addEventListener('click', async () => {
+        const permission = await Notification.requestPermission();
+        updateStatus();
+      });
+
+      notifyBtn.addEventListener('click', () => {
+        if (Notification.permission !== 'granted') {
+          status.textContent = 'Permissão não concedida. Clique em "Solicitar Permissão".';
+          return;
+        }
+
+        const notification = new Notification('Olá! 👋', {
+          body: 'Esta é uma notificação usando a Notification API.',
+          icon: 'https://cdn-icons-png.flaticon.com/512/1827/1827392.png',
+        });
+
+        notification.addEventListener('click', () => {
+          window.focus();
+          status.textContent = 'Você clicou na notificação!';
+        });
+      });
+    </script>
+  </body>
+</html>

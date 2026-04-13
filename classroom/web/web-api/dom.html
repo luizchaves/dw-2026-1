@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dialog API</title>
+    <style>
+      button {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-right: 0.5rem;
+      }
+
+      dialog {
+        border: none;
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 400px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.5);
+      }
+
+      dialog h2 {
+        margin-top: 0;
+      }
+
+      dialog form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      dialog input {
+        padding: 0.5rem;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+
+      dialog .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+
+      #result {
+        margin-top: 1rem;
+        padding: 0.5rem;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Dialog API</h1>
+
+    <button id="openBtn">Abrir Modal</button>
+    <button id="alertBtn">Abrir Alerta</button>
+    <p id="result"></p>
+
+    <!-- Modal com formulário -->
+    <dialog id="modal">
+      <h2>Qual é o seu nome?</h2>
+      <form method="dialog">
+        <input id="nameInput" type="text" placeholder="Digite seu nome..." />
+        <div class="actions">
+          <button type="submit" value="cancel">Cancelar</button>
+          <button type="submit" value="confirm">Confirmar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Alerta simples -->
+    <dialog id="alert">
+      <h2>Aviso</h2>
+      <p>Este é um alerta usando a Dialog API nativa do navegador.</p>
+      <div class="actions">
+        <button id="closeAlert">Fechar</button>
+      </div>
+    </dialog>
+
+    <script>
+      const openBtn = document.querySelector('#openBtn');
+      const alertBtn = document.querySelector('#alertBtn');
+      const modal = document.querySelector('#modal');
+      const alert = document.querySelector('#alert');
+      const closeAlert = document.querySelector('#closeAlert');
+      const nameInput = document.querySelector('#nameInput');
+      const result = document.querySelector('#result');
+
+      openBtn.addEventListener('click', () => {
+        nameInput.value = '';
+        modal.showModal();
+      });
+
+      modal.addEventListener('close', () => {
+        if (modal.returnValue === 'confirm' && nameInput.value.trim()) {
+          result.textContent = `Olá, ${nameInput.value.trim()}!`;
+          result.style.color = '#2ecc71';
+        } else {
+          result.textContent = 'Ação cancelada.';
+          result.style.color = '#e74c3c';
+        }
+      });
+
+      alertBtn.addEventListener('click', () => {
+        alert.showModal();
+      });
+
+      closeAlert.addEventListener('click', () => {
+        alert.close();
+      });
+    </script>
+  </body>
+</html>

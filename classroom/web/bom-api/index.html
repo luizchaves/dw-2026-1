@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOM</title>
+</head>
+<body>
+  <h1>Lista</h1>
+  <ul></ul>
+  <script>
+    const listLength = Number(prompt('Defina o tamanho da lista:'));
+    const ul = document.querySelector('ul');
+
+    if (listLength > 0) {
+      ul.innerHTML = createList(listLength);
+    }
+
+    function createList(length) {
+      return [...Array(length)].map((_, i) => `<li>Item ${i + 1}</li>`).join('');
+    }
+  </script>
+</body>
+</html>

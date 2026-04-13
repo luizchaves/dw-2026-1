@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Storage API</title>
+    <style>
+      input,
+      button {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      button {
+        cursor: pointer;
+        margin-right: 0.5rem;
+      }
+
+      #items {
+        margin-top: 1rem;
+        padding: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        min-height: 50px;
+      }
+
+      .item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.3rem 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      .item button {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.5rem;
+        color: #e74c3c;
+        border: 1px solid #e74c3c;
+        background: transparent;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Web Storage API</h1>
+
+    <div>
+      <input id="input" type="text" placeholder="Adicionar item..." />
+      <button id="addBtn">Adicionar</button>
+      <button id="clearBtn">Limpar tudo</button>
+    </div>
+    <div id="items"></div>
+
+    <script>
+      const input = document.querySelector('#input');
+      const addBtn = document.querySelector('#addBtn');
+      const clearBtn = document.querySelector('#clearBtn');
+      const itemsDiv = document.querySelector('#items');
+
+      function getItems() {
+        const data = localStorage.getItem('items');
+        return data ? JSON.parse(data) : [];
+      }
+
+      function saveItems(items) {
+        localStorage.setItem('items', JSON.stringify(items));
+      }
+
+      function render() {
+        const items = getItems();
+
+        if (items.length === 0) {
+          itemsDiv.innerHTML = '<p>Nenhum item salvo.</p>';
+          return;
+        }
+
+        itemsDiv.innerHTML = items
+          .map(
+            (item, i) => `
+            <div class="item">
+              <span>${item}</span>
+              <button data-index="${i}">Remover</button>
+            </div>
+          `
+          )
+          .join('');
+
+        itemsDiv.querySelectorAll('button').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const items = getItems();
+            items.splice(btn.dataset.index, 1);
+            saveItems(items);
+            render();
+          });
+        });
+      }
+
+      addBtn.addEventListener('click', () => {
+        const value = input.value.trim();
+        if (!value) return;
+
+        const items = getItems();
+        items.push(value);
+        saveItems(items);
+        input.value = '';
+        render();
+      });
+
+      clearBtn.addEventListener('click', () => {
+        localStorage.removeItem('items');
+        render();
+      });
+
+      render();
+    </script>
+  </body>
+</html>

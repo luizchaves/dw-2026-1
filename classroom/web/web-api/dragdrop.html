@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drag and Drop API</title>
+    <style>
+      .container {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+      }
+
+      .dropzone {
+        width: 250px;
+        min-height: 300px;
+        padding: 1rem;
+        border: 2px dashed #ccc;
+        border-radius: 12px;
+        background: #fafafa;
+        transition: background 0.2s, border-color 0.2s;
+      }
+
+      .dropzone.over {
+        background: #eaf6ff;
+        border-color: #3498db;
+      }
+
+      .dropzone h3 {
+        margin-top: 0;
+        text-align: center;
+        color: #555;
+      }
+
+      .item {
+        padding: 0.6rem 1rem;
+        margin-bottom: 0.5rem;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        cursor: grab;
+        user-select: none;
+        transition: opacity 0.2s;
+      }
+
+      .item:active {
+        cursor: grabbing;
+      }
+
+      .item.dragging {
+        opacity: 0.4;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Drag and Drop API</h1>
+    <p>Arraste os itens entre as colunas:</p>
+
+    <div class="container">
+      <div class="dropzone" id="todo">
+        <h3>A Fazer</h3>
+        <div class="item" draggable="true">Estudar HTML</div>
+        <div class="item" draggable="true">Praticar CSS</div>
+        <div class="item" draggable="true">Aprender JavaScript</div>
+      </div>
+
+      <div class="dropzone" id="doing">
+        <h3>Fazendo</h3>
+      </div>
+
+      <div class="dropzone" id="done">
+        <h3>Concluído</h3>
+      </div>
+    </div>
+
+    <script>
+      const items = document.querySelectorAll('.item');
+      const dropzones = document.querySelectorAll('.dropzone');
+
+      let draggedItem = null;
+
+      items.forEach(addDragEvents);
+
+      function addDragEvents(item) {
+        item.addEventListener('dragstart', () => {
+          draggedItem = item;
+          item.classList.add('dragging');
+        });
+
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+          draggedItem = null;
+        });
+      }
+
+      dropzones.forEach((zone) => {
+        zone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          zone.classList.add('over');
+        });
+
+        zone.addEventListener('dragleave', () => {
+          zone.classList.remove('over');
+        });
+
+        zone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          zone.classList.remove('over');
+
+          if (draggedItem) {
+            zone.appendChild(draggedItem);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

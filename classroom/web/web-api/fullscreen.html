@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fullscreen API</title>
+    <style>
+      button {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      #box {
+        margin-top: 1rem;
+        width: 400px;
+        height: 300px;
+        background: linear-gradient(135deg, #3498db, #8e44ad);
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.5rem;
+        position: relative;
+      }
+
+      #box button {
+        margin-top: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid #fff;
+        color: #fff;
+        border-radius: 8px;
+      }
+
+      #box:fullscreen {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+      }
+
+      #status {
+        margin-top: 1rem;
+        padding: 0.5rem;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Fullscreen API</h1>
+
+    <button id="pageBtn">Tela cheia (página)</button>
+    <button id="exitBtn">Sair da tela cheia</button>
+    <p id="status"></p>
+
+    <div id="box">
+      <span>Elemento em destaque</span>
+      <button id="boxBtn">Tela cheia (este elemento)</button>
+    </div>
+
+    <script>
+      const pageBtn = document.querySelector('#pageBtn');
+      const exitBtn = document.querySelector('#exitBtn');
+      const boxBtn = document.querySelector('#boxBtn');
+      const box = document.querySelector('#box');
+      const status = document.querySelector('#status');
+
+      function updateStatus() {
+        if (document.fullscreenElement) {
+          const tag = document.fullscreenElement.tagName.toLowerCase();
+          const id = document.fullscreenElement.id
+            ? `#${document.fullscreenElement.id}`
+            : '';
+          status.textContent = `Em tela cheia: <${tag}${id}>`;
+          status.style.color = '#2ecc71';
+        } else {
+          status.textContent = 'Modo normal.';
+          status.style.color = '#333';
+        }
+      }
+
+      document.addEventListener('fullscreenchange', updateStatus);
+      updateStatus();
+
+      pageBtn.addEventListener('click', async () => {
+        try {
+          await document.documentElement.requestFullscreen();
+        } catch (err) {
+          status.textContent = 'Erro: ' + err.message;
+          status.style.color = '#e74c3c';
+        }
+      });
+
+      boxBtn.addEventListener('click', async () => {
+        try {
+          await box.requestFullscreen();
+        } catch (err) {
+          status.textContent = 'Erro: ' + err.message;
+          status.style.color = '#e74c3c';
+        }
+      });
+
+      exitBtn.addEventListener('click', async () => {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        }
+      });
+    </script>
+  </body>
+</html>

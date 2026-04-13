@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Speech API</title>
+    <style>
+      textarea {
+        width: 100%;
+        max-width: 500px;
+        height: 80px;
+        font-size: 1rem;
+        padding: 0.5rem;
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-right: 0.5rem;
+      }
+
+      select,
+      input[type='range'] {
+        padding: 0.3rem;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      label {
+        display: block;
+        margin-top: 0.5rem;
+        font-weight: bold;
+      }
+
+      #status {
+        margin-top: 1rem;
+        padding: 0.5rem;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Web Speech API — Síntese de Fala</h1>
+
+    <textarea id="input">Olá! Esta é a Web Speech API em ação.</textarea>
+
+    <label for="voiceSelect">Voz:</label>
+    <select id="voiceSelect"></select>
+
+    <label for="rate">Velocidade: <span id="rateValue">1</span></label>
+    <input id="rate" type="range" min="0.5" max="2" step="0.1" value="1" />
+
+    <label for="pitch">Tom: <span id="pitchValue">1</span></label>
+    <input id="pitch" type="range" min="0" max="2" step="0.1" value="1" />
+
+    <div style="margin-top: 0.5rem">
+      <button id="speakBtn">Falar</button>
+      <button id="stopBtn">Parar</button>
+    </div>
+
+    <p id="status"></p>
+
+    <script>
+      const input = document.querySelector('#input');
+      const voiceSelect = document.querySelector('#voiceSelect');
+      const rateInput = document.querySelector('#rate');
+      const pitchInput = document.querySelector('#pitch');
+      const rateValue = document.querySelector('#rateValue');
+      const pitchValue = document.querySelector('#pitchValue');
+      const speakBtn = document.querySelector('#speakBtn');
+      const stopBtn = document.querySelector('#stopBtn');
+      const status = document.querySelector('#status');
+
+      const synth = window.speechSynthesis;
+      let voices = [];
+
+      function loadVoices() {
+        voices = synth.getVoices();
+        voiceSelect.innerHTML = voices
+          .map(
+            (voice, i) =>
+              `<option value="${i}">${voice.name} (${voice.lang})</option>`
+          )
+          .join('');
+
+        const ptIndex = voices.findIndex((v) => v.lang.startsWith('pt'));
+        if (ptIndex !== -1) {
+          voiceSelect.value = ptIndex;
+        }
+      }
+
+      loadVoices();
+      synth.addEventListener('voiceschanged', loadVoices);
+
+      rateInput.addEventListener('input', () => {
+        rateValue.textContent = rateInput.value;
+      });
+
+      pitchInput.addEventListener('input', () => {
+        pitchValue.textContent = pitchInput.value;
+      });
+
+      speakBtn.addEventListener('click', () => {
+        const text = input.value.trim();
+
+        if (!text) {
+          status.textContent = 'Digite algo para falar.';
+          return;
+        }
+
+        synth.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.voice = voices[voiceSelect.value];
+        utterance.rate = parseFloat(rateInput.value);
+        utterance.pitch = parseFloat(pitchInput.value);
+
+        utterance.addEventListener('start', () => {
+          status.textContent = 'Falando...';
+          status.style.color = '#2ecc71';
+        });
+
+        utterance.addEventListener('end', () => {
+          status.textContent = 'Concluído.';
+          status.style.color = '#333';
+        });
+
+        synth.speak(utterance);
+      });
+
+      stopBtn.addEventListener('click', () => {
+        synth.cancel();
+        status.textContent = 'Parado.';
+        status.style.color = '#e74c3c';
+      });
+    </script>
+  </body>
+</html>
