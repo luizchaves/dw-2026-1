@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web API</title>
+</head>
+
+<body>
+  <h1>Web API</h1>
+  <ul id="web-api-list" class="web-api-list">
+    <!-- <li>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model">
+        Document Object Model (DOM)
+      </a>
+    </li>
+    <li>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">
+        Fetch API
+      </a>
+    </li>
+    <li>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API">
+        Canvas API
+      </a>
+    </li>
+    <li>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API">
+        Geolocation API
+      </a>
+    </li>
+    <li>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalStorage">
+        Local Storage
+      </a>
+    </li> -->
+  </ul>
+  <script>
+    const ulElement = document.getElementById('web-api-list');
+    // const ulElement = document.querySelector('ul');
+    // const ulElement = document.querySelector('#web-api-list');
+    // const ulElement = document.querySelector('.web-api-list');
+
+    const webApiList = [
+      {
+        name: "Document Object Model (DOM)",
+        url: "https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model"
+      },
+      {
+        name: "Fetch API",
+        url: "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API"
+      },
+      {
+        name: "Canvas API",
+        url: "https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API"
+      },
+      {
+        name: "Geolocation API",
+        url: "https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API"
+      },
+      {
+        name: "Local Storage",
+        url: "https://developer.mozilla.org/en-US/docs/Web/API/LocalStorage"
+      },
+      {
+        name: "Web Audio API",
+        url: "https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API"
+      }
+    ];
+
+    function createWebApiItem(webApi) {
+      return `
+        <li>
+          <a href="${webApi.url}">
+            ${webApi.name}
+          </a>
+        </li>
+      `;
+    }
+
+    function createWebApiItemElement(webApi) {
+      const liElement = document.createElement('li');
+      const aElement = document.createElement('a');
+
+      aElement.href = webApi.url;
+      aElement.textContent = webApi.name;
+
+      liElement.appendChild(aElement);
+
+      return liElement;
+    }
+
+    // Element.innerHTML
+    // ulElement.innerHTML = webApiList.map(createWebApiItem).join('');
+
+    webApiList.forEach(webApi => {
+      const webApiItem = createWebApiItem(webApi);
+
+      // Element.insertAdjacentHTML(position, text)
+      // ulElement.insertAdjacentHTML('beforeend', webApiItem);
+
+      // Element.innerHTML
+      // ulElement.innerHTML += webApiItem;
+
+      // Element.appendChild()
+      ulElement.appendChild(createWebApiItemElement(webApi));
+    });
+  </script>
+</body>
+
+</html>
