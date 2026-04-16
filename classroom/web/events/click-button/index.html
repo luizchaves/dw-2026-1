@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script>
+    function logEvent(number) {
+      console.log(`Event ${number}`);
+    }
+  </script>
+</head>
+<body>
+  <button onclick="logEvent(1)">Event 1</button>
+  <button>Event 2</button>
+  <button>Event 3</button>
+
+  <script>
+    const button2 = document.querySelectorAll('button')[1];
+    button2.onclick = () => logEvent(2);
+
+    const button3 = document.querySelectorAll('button')[2];
+    button3.addEventListener('click', () => logEvent(3));
+  </script>
+</body>
+</html>
