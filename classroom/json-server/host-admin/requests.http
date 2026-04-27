@@ -1,0 +1,39 @@
+### Criando um Host com REST Client (POST)
+
+POST http://localhost:3000/hosts
+Content-Type: application/json
+
+{
+  "name": "IFPB",
+  "group": "Desenvolvimento",
+  "status": "Manutenção",
+  "ip": "192.168.0.122",
+  "os": "Windows Server 2019",
+  "uptime": "7 dias"
+}
+
+### Listando Hosts com REST Client (GET)
+
+GET http://localhost:3000/hosts
+
+### Acessando um Host específico com REST Client (GET)
+
+GET http://localhost:3000/hosts/IMHnqPBd_u8
+
+### Atualizando um Host com REST Client (PUT)
+
+PUT http://localhost:3000/hosts/IMHnqPBd_u8
+Content-Type: application/json
+
+{
+  "name": "IFPB Dev",
+  "group": "Desenvolvimento",
+  "status": "Manutenção",
+  "ip": "192.168.0.123",
+  "os": "Windows Server 2019",
+  "uptime": "7 dias"
+}
+
+### Deletando um Host com REST Client (DELETE)
+
+DELETE http://localhost:3000/hosts/IMHnqPBd_u8

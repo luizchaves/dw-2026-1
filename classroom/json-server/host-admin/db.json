@@ -1,0 +1,59 @@
+{
+  "hosts": [
+    {
+      "id": "1",
+      "name": "Alpha",
+      "group": "Produção",
+      "status": "Online",
+      "ip": "192.168.0.10",
+      "os": "Ubuntu 22.04",
+      "uptime": "18 dias"
+    },
+    {
+      "id": "2",
+      "name": "Beta",
+      "group": "Desenvolvimento",
+      "status": "Manutenção",
+      "ip": "192.168.0.21",
+      "os": "Windows Server 2019",
+      "uptime": "7 dias"
+    },
+    {
+      "id": "3",
+      "name": "Gamma",
+      "group": "Testes",
+      "status": "Offline",
+      "ip": "192.168.0.32",
+      "os": "Debian 12",
+      "uptime": "—"
+    },
+    {
+      "id": "4",
+      "name": "Delta",
+      "group": "Backup",
+      "status": "Online",
+      "ip": "192.168.0.44",
+      "os": "CentOS 7",
+      "uptime": "42 dias"
+    },
+    {
+      "id": "5",
+      "name": "Épsilon",
+      "group": "Staging",
+      "status": "Online",
+      "ip": "192.168.0.55",
+      "os": "macOS Ventura",
+      "uptime": "12 dias"
+    },
+    {
+      "id": "6",
+      "name": "Zeta",
+      "group": "Analytics",
+      "status": "Manutenção",
+      "ip": "192.168.0.66",
+      "os": "AlmaLinux 9",
+      "uptime": "2 dias"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
