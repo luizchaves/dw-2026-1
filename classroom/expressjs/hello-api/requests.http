@@ -1,2 +1,24 @@
+@server=http://localhost:3000
+
 ### GET /
-GET http://localhost:3000/
+GET {{server}}/
+
+### GET /hello/en
+GET {{server}}/hello/en
+
+### GET /hello/pt
+GET {{server}}/hello/pt
+
+### GET /en/:name (path parameter, route parameter)
+GET {{server}}/en/John
+
+### GET /pt (query parameter, query string)
+GET {{server}}/pt?name=John
+
+### GET /es (body parameter, request body)
+POST {{server}}/es
+Content-Type: application/json
+
+{
+  "name": "John"
+}
