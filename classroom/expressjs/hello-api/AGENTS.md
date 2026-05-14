@@ -52,3 +52,7 @@ test/
 - `app` é exportado como `default` para facilitar testes com supertest
 - Swagger disponível em `/api/docs` e `/api/docs.json`
 - Porta padrão: `3000`
+
+## Workflow
+
+- Toda alteração ou nova feature deve ser automaticamente commitada após validação (build/testes aplicáveis).
