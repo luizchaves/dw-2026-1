@@ -1,0 +1,5 @@
+services:
+  hello-api-ts:
+    build: .
+    ports:
+      - "3000:3000"

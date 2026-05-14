@@ -1,0 +1,7 @@
+services:
+  hello-api-ts:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./src:/app/src
