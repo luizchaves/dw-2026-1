@@ -1,24 +1,41 @@
 @server=http://localhost:3000
 
-### GET /
-GET {{server}}/
+### GET /api
+GET {{server}}/api/
 
-### GET /hello/en
-GET {{server}}/hello/en
+### GET /api/en
+GET {{server}}/api/en
 
-### GET /hello/pt
-GET {{server}}/hello/pt
+### GET /api/pt
+GET {{server}}/api/pt
 
-### GET /en/:name (path parameter, route parameter)
-GET {{server}}/en/John
+### GET /api/hello/en/:name (path parameter, route parameter)
+GET {{server}}/api/hello/en/John
 
-### GET /pt (query parameter, query string)
-GET {{server}}/pt?name=John
+### GET /api/hello/en failure case (404 Not Found)
+GET {{server}}/api/hello/en
 
-### GET /es (body parameter, request body)
-POST {{server}}/es
+### GET /api/hello/pt (query parameter, query string)
+GET {{server}}/api/hello/pt?name=John
+
+### GET /api/hello/pt failure case (400 Bad Request)
+GET {{server}}/api/hello/pt
+
+### POST /api/hello/es (body parameter, request body)
+POST {{server}}/api/hello/es
 Content-Type: application/json
 
 {
   "name": "John"
 }
+
+### POST /api/hello/es failure case (400 Bad Request)
+POST {{server}}/api/hello/es
+Content-Type: application/json
+
+{
+  "person": "John"
+}
+
+### POST /api/hello/es failure case (400 Bad Request)
+POST {{server}}/api/hello/es

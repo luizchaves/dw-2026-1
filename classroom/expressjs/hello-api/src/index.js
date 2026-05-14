@@ -1,42 +1,28 @@
 import express from 'express';
 import morgan from 'morgan';
+import swaggerUi from 'swagger-ui-express';
+
+import routes from './routes.js';
+import { errorHandler, notFoundHandler } from './errorHandlers.js';
+import swaggerSpec from './swagger.js';
 
 const app = express();
+app.use(morgan('tiny'));
 
 app.use(express.json());
 
-app.use(morgan('tiny'));
-
-app.get('/', (req, res) => {
-  res.send('Hello API');
+app.get('/api/docs.json', (req, res) => {
+  res.json(swaggerSpec);
 });
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.get('/hello/en', (req, res) => {
-  res.send('Hello, World!');
-});
+app.use('/api', routes);
+app.use(notFoundHandler);
+app.use(errorHandler);
 
-app.get('/hello/pt', (req, res) => {
-  res.send('Olá, Mundo!');
-});
-
-app.get('/en/:name', (req, res) => {
-  const { name } = req.params;
-
-  res.json({ message: `Hello, ${name}!` });
-});
-
-app.get('/pt', (req, res) => {
-  const { name } = req.query;
-
-  res.json({ message: `Olá, ${name}!` });
-});
-
-app.post('/es', (req, res) => {
-  const { name } = req.body;
-
-  res.json({ message: `¡Hola, ${name}!` });
-});
 
 app.listen(3000, () => {
   console.log('Server is running on http://localhost:3000');
 });
+
+export default app;
