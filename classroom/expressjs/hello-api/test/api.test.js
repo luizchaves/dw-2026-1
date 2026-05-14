@@ -51,7 +51,9 @@ describe('/api/hello', () => {
     const response = await request(app).get('/api/hello/pt');
 
     assert.equal(response.status, 400);
-    assert.deepEqual(response.body, { error: 'Name query parameter is required' });
+    assert.deepEqual(response.body, {
+      error: 'Name query parameter is required',
+    });
   });
 
   test('POST /api/hello/es with valid JSON returns 200', async () => {
@@ -71,7 +73,9 @@ describe('/api/hello', () => {
       .send('name=John');
 
     assert.equal(response.status, 400);
-    assert.deepEqual(response.body, { error: 'Content-Type must be application/json' });
+    assert.deepEqual(response.body, {
+      error: 'Content-Type must be application/json',
+    });
   });
 
   test('POST /api/hello/es without name in body returns 400', async () => {
@@ -81,7 +85,9 @@ describe('/api/hello', () => {
       .send({ person: 'John' });
 
     assert.equal(response.status, 400);
-    assert.deepEqual(response.body, { error: 'Name body parameter is required' });
+    assert.deepEqual(response.body, {
+      error: 'Name body parameter is required',
+    });
   });
 });
 

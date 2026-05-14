@@ -3,7 +3,8 @@ const swaggerSpec = {
   info: {
     title: 'Hello API',
     version: '1.0.0',
-    description: 'API de exemplo com Express para demonstrar rotas, parametros e tratamento de erros.',
+    description:
+      'API de exemplo com Express para demonstrar rotas, parametros e tratamento de erros.',
   },
   servers: [
     {
@@ -11,10 +12,7 @@ const swaggerSpec = {
       description: 'Servidor local',
     },
   ],
-  tags: [
-    { name: 'Root' },
-    { name: 'Hello' },
-  ],
+  tags: [{ name: 'Root' }, { name: 'Hello' }],
   paths: {
     '/api/': {
       get: {

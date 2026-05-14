@@ -1,25 +1,24 @@
 import express from 'express';
-import { HttpError } from './HttpError.js';
+import { z } from 'zod';
 import {
-  nameBodySchema,
-  nameParamSchema,
-  nameQuerySchema,
+  requiredTrimmedString,
   validateRequest,
-} from './middleware/validation.js';
+} from '../middleware/validation.js';
+import { requireJsonContentType } from '../middleware/requireJsonContentType.js';
 
 const routes = express.Router();
 
-const requireJsonContentType = (
-  req: express.Request,
-  _res: express.Response,
-  next: express.NextFunction
-) => {
-  if (req.headers['content-type'] !== 'application/json') {
-    throw new HttpError('Content-Type must be application/json');
-  }
+const nameParamSchema = z.object({
+  name: requiredTrimmedString('Name path parameter is required'),
+});
 
-  next();
-};
+const nameQuerySchema = z.object({
+  name: requiredTrimmedString('Name query parameter is required'),
+});
+
+const nameBodySchema = z.object({
+  name: requiredTrimmedString('Name body parameter is required'),
+});
 
 routes.get('/', (_req, res) => {
   res.json({ message: 'Hello API' });

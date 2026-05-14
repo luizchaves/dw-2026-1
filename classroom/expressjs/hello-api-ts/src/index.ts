@@ -2,9 +2,9 @@ import express from 'express';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
 
-import routes from './routes.js';
-import { errorHandler, notFoundHandler } from './errorHandlers.js';
-import swaggerSpec from './swagger.js';
+import routes from './routes/index.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandlers.js';
+import swaggerSpec from './docs/swagger.js';
 
 const app = express();
 
