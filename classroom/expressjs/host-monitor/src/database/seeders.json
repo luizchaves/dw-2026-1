@@ -1,0 +1,12 @@
+{
+  "hosts": [
+    {
+      "name": "New Host",
+      "ip": "192.168.0.99",
+      "os": "Ubuntu 24.04",
+      "group": "Produção",
+      "status": "Online",
+      "uptime": "—"
+    }
+  ]
+}

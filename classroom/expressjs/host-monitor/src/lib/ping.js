@@ -49,19 +49,19 @@ export function parse(output) {
   const losted = transmitted - received;
 
   regex =
-    /min\/avg\/max\/(stddev|mdev) = (?<min>[\d.]+)\/(?<avg>[\d.]+)\/(?<max>[\d.]+)\/(?<stddev>[\d.]+)/;
+    /min\/avg\/max\/(stddev|mdev) = (?<min>[\d.]+)\/(?<avg>[\d.]+)\/(?<max>[\d.]+)\/(?<stddev>[\d.]+|nan)/;
   const {
     groups: { min, avg, max, stddev },
   } = output.match(regex);
 
   ping.statistics = {
     transmitted: parseInt(transmitted),
-    received: parseInt(transmitted),
+    received: parseInt(received),
     losted: losted,
     min: parseFloat(min),
     avg: parseFloat(avg),
     max: parseFloat(max),
-    stddev: parseFloat(stddev),
+    stddev: Number.isNaN(parseFloat(stddev)) ? NaN : parseFloat(stddev),
   };
 
   return ping;

@@ -5,7 +5,8 @@ import { HttpError } from '../errors/HttpError.js';
 import { ping } from '../lib/ping.js';
 import { requireJsonContentType } from '../middleware/requireJsonContentType.js';
 import { validateRequest } from '../middleware/validation.js';
-import { hosts } from '../database/data.js';
+import Host from '../models/Hosts.js';
+import { HostNotFoundError, InvalidHostError } from '../errors/HostError.js';
 const routes = express.Router();
 
 const hostSchema = z.object({
@@ -17,21 +18,31 @@ const hostSchema = z.object({
   uptime: z.string(),
 });
 
+const mapHostError = (error) => {
+  if (error instanceof HostNotFoundError || error instanceof InvalidHostError) {
+    throw new HttpError(error.message);
+  }
+
+  throw error;
+};
+
 routes.post(
   '/hosts',
   requireJsonContentType,
   validateRequest({ body: hostSchema }),
   async (req, res) => {
-    const newHost = { ...req.body, id: cuid() };
+    try {
+      const newHost = Host.create({ ...req.body, id: cuid() });
 
-    hosts.push(newHost);
-
-    res.status(201).json(newHost);
+      res.status(201).json(newHost);
+    } catch (error) {
+      mapHostError(error);
+    }
   }
 );
 
 routes.get('/hosts', async (req, res) => {
-  res.json(hosts);
+  res.json(Host.read());
 });
 
 routes.put(
@@ -41,17 +52,13 @@ routes.put(
   async (req, res) => {
     const { id } = req.params;
 
-    const hostIndex = hosts.findIndex((h) => h.id === id);
+    try {
+      const updatedHost = Host.update({ id, ...req.body });
 
-    if (hostIndex === -1) {
-      throw new HttpError('Host not found');
+      res.status(200).json(updatedHost);
+    } catch (error) {
+      mapHostError(error);
     }
-
-    const updatedHost = { ...req.body, id };
-
-    hosts[hostIndex] = updatedHost;
-
-    res.status(200).json(updatedHost);
   }
 );
 
@@ -61,15 +68,12 @@ routes.delete(
   async (req, res) => {
     const { id } = req.params;
 
-    const hostIndex = hosts.findIndex((h) => h.id === id);
-
-    if (hostIndex === -1) {
-      throw new HttpError('Host not found');
+    try {
+      Host.remove(id);
+      res.status(204).send();
+    } catch (error) {
+      mapHostError(error);
     }
-
-    hosts.splice(hostIndex, 1);
-
-    res.status(204).send();
   }
 );
 
@@ -80,10 +84,11 @@ routes.get(
     const { id } = req.params;
     const { count } = req.query;
 
-    const host = hosts.find((h) => h.id === id);
-
-    if (!host) {
-      throw new HttpError('Host not found');
+    let host;
+    try {
+      host = Host.readById(id);
+    } catch (error) {
+      mapHostError(error);
     }
 
     const parsedCount = count !== undefined ? Number(count) : 1;
