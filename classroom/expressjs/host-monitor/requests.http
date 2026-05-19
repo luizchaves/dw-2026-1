@@ -1,0 +1,47 @@
+@server=http://localhost:3000
+@createdHostId={{createHost.response.body.$.id}}
+
+### POST /api/hosts
+# @name createHost
+POST {{server}}/api/hosts
+Content-Type: application/json
+
+{
+  "name": "New Host",
+  "ip": "192.168.0.99",
+  "os": "Ubuntu 24.04",
+  "group": "Produção",
+  "status": "Online",
+  "uptime": "—"
+}
+
+### GET /api/hosts
+GET {{server}}/api/hosts
+
+### PUT /api/hosts/{{createdHostId}}
+PUT {{server}}/api/hosts/{{createdHostId}}
+Content-Type: application/json
+
+{
+  "name": "Other Host",
+  "ip": "192.168.0.91",
+  "os": "Ubuntu 24.04",
+  "group": "Produção",
+  "status": "Online",
+  "uptime": "—"
+}
+
+### DELETE /api/hosts/{{createdHostId}}
+DELETE {{server}}/api/hosts/{{createdHostId}}
+
+### GET /api/hosts/{{createdHostId}}/ping?count=1
+GET {{server}}/api/hosts/{{createdHostId}}/ping?count=1
+
+### GET /api/hosts/{{createdHostId}}/ping?count=3
+GET {{server}}/api/hosts/{{createdHostId}}/ping?count=3
+
+### GET /api/hosts/{{createdHostId}}/ping
+GET {{server}}/api/hosts/{{createdHostId}}/ping
+
+### GET /api/hosts/{{createdHostId}}/ping with unknown host
+GET {{server}}/api/hosts/cj1234567890abcdef123456/ping
