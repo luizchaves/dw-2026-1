@@ -1,0 +1,16 @@
+@server=http://localhost:3000
+
+### GET /api/ping?host=google.com&count=1
+GET {{server}}/api/ping?host=google.com&count=1
+
+### GET /api/ping?host=google.com&count=3
+GET {{server}}/api/ping?host=google.com&count=3
+
+### GET /api/ping?host=google.com
+GET {{server}}/api/ping?host=google.com
+
+### GET /api/ping?host=google.com
+GET {{server}}/api/ping?host=unknownhost.com
+
+### GET /api/ping
+GET {{server}}/api/ping
