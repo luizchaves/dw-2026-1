@@ -3,9 +3,14 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "test": "node --test",
+    "test": "npm run test:api && npm run test:front",
+    "test:api": "node --test test/api/*.test.js",
+    "test:front": "vitest run test/frontend",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "db:reload": "npm run db:drop && npm run db:load",
+    "db:load": "node src/database/load.js",
+    "db:drop": "rm src/database/db.sqlite"
   },
   "dependencies": {
     "cuid": "^3.0.0",
@@ -15,7 +20,9 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "jsdom": "^29.1.1",
     "prettier": "^3.6.2",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.7"
   }
 }

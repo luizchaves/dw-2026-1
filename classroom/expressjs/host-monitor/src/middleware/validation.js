@@ -19,17 +19,25 @@ export const validateRequest =
   ({ params, query, body } = {}) =>
   (req, res, next) => {
     try {
-      res.locals.validated = {
-        params: params
-          ? parseWithHttpError(params, req.params, 'Invalid path parameters')
-          : undefined,
-        query: query
-          ? parseWithHttpError(query, req.query, 'Invalid query parameters')
-          : undefined,
-        body: body
-          ? parseWithHttpError(body, req.body, 'Invalid body')
-          : undefined,
-      };
+      if (params) {
+        req.params = parseWithHttpError(
+          params,
+          req.params,
+          'Invalid path parameters'
+        );
+      }
+
+      if (query) {
+        req.query = parseWithHttpError(
+          query,
+          req.query,
+          'Invalid query parameters'
+        );
+      }
+
+      if (body) {
+        req.body = parseWithHttpError(body, req.body, 'Invalid body');
+      }
 
       next();
     } catch (error) {

@@ -2,17 +2,14 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 
-import app from '../src/index.js';
+import app from '../../src/index.js';
 
 describe('/api/hosts', () => {
   test('POST /api/hosts with valid JSON returns 201', async () => {
     const hostPayload = {
       name: 'Server A',
-      ip: '192.168.0.10',
-      os: 'Linux',
-      group: 'Production',
-      status: 'Online',
-      uptime: '24 days',
+      address: '192.168.0.10',
+      category: 'Production',
     };
 
     const response = await request(app)
@@ -22,11 +19,11 @@ describe('/api/hosts', () => {
 
     assert.equal(response.status, 201);
     assert.equal(response.body.name, hostPayload.name);
-    assert.equal(response.body.ip, hostPayload.ip);
-    assert.equal(response.body.os, hostPayload.os);
-    assert.equal(response.body.group, hostPayload.group);
-    assert.equal(response.body.status, hostPayload.status);
-    assert.equal(response.body.uptime, hostPayload.uptime);
+    assert.equal(response.body.address, hostPayload.address);
+    assert.equal(response.body.category, hostPayload.category);
+    assert.equal(response.body.status, 'Online');
+    assert.equal(typeof response.body.uptime, 'string');
+    assert.equal(Number.isNaN(Date.parse(response.body.uptime)), false);
     assert.ok(response.body.id);
   });
 
@@ -55,20 +52,16 @@ describe('/api/hosts', () => {
       .set('Content-Type', 'application/json')
       .send({
         name: 'Server B',
-        ip: '192.168.0.11',
-        os: 'Windows',
-        group: 'Staging',
-        status: 'Manutenção',
-        uptime: '8 days',
+        address: '192.168.0.11',
+        category: 'Staging',
       });
 
     assert.equal(createResponse.status, 201);
 
     const updatedPayload = {
       name: 'Server B Updated',
-      ip: '192.168.0.11',
-      os: 'Windows Server',
-      group: 'Staging',
+      address: '192.168.0.11',
+      category: 'Staging',
       status: 'Online',
       uptime: '10 days',
     };
@@ -81,7 +74,6 @@ describe('/api/hosts', () => {
     assert.equal(response.status, 200);
     assert.equal(response.body.id, createResponse.body.id);
     assert.equal(response.body.name, updatedPayload.name);
-    assert.equal(response.body.os, updatedPayload.os);
     assert.equal(response.body.status, updatedPayload.status);
   });
 
@@ -91,11 +83,8 @@ describe('/api/hosts', () => {
       .set('Content-Type', 'application/json')
       .send({
         name: 'Server C',
-        ip: '192.168.0.12',
-        os: 'macOS',
-        group: 'Development',
-        status: 'Offline',
-        uptime: '0 days',
+        address: '192.168.0.12',
+        category: 'Development',
       });
 
     assert.equal(createResponse.status, 201);
@@ -122,9 +111,8 @@ describe('/api/hosts', () => {
       .set('Content-Type', 'application/json')
       .send({
         name: 'Missing Host',
-        ip: '192.168.0.13',
-        os: 'Linux',
-        group: 'QA',
+        address: '192.168.0.13',
+        category: 'QA',
         status: 'Online',
         uptime: '1 day',
       });
@@ -141,11 +129,8 @@ describe('/api/hosts/:id/ping', () => {
       .set('Content-Type', 'application/json')
       .send({
         name: 'Ping Host A',
-        ip: '127.0.0.1',
-        os: 'Linux',
-        group: 'Production',
-        status: 'Online',
-        uptime: '24 days',
+        address: '127.0.0.1',
+        category: 'Production',
       });
 
     assert.equal(createResponse.status, 201);
@@ -166,11 +151,8 @@ describe('/api/hosts/:id/ping', () => {
       .set('Content-Type', 'application/json')
       .send({
         name: 'Ping Host B',
-        ip: '127.0.0.1',
-        os: 'Linux',
-        group: 'Production',
-        status: 'Online',
-        uptime: '24 days',
+        address: '127.0.0.1',
+        category: 'Production',
       });
 
     assert.equal(createResponse.status, 201);
@@ -192,11 +174,8 @@ describe('/api/hosts/:id/ping', () => {
       .set('Content-Type', 'application/json')
       .send({
         name: 'Ping Host C',
-        ip: '127.0.0.1',
-        os: 'Linux',
-        group: 'Production',
-        status: 'Online',
-        uptime: '24 days',
+        address: '127.0.0.1',
+        category: 'Production',
       });
 
     assert.equal(createResponse.status, 201);
@@ -227,11 +206,8 @@ describe('/api/hosts/:id/ping', () => {
       .set('Content-Type', 'application/json')
       .send({
         name: 'Unreachable Host',
-        ip: '192.0.2.1',
-        os: 'Linux',
-        group: 'Production',
-        status: 'Online',
-        uptime: '0 days',
+        address: '192.0.2.1',
+        category: 'Production',
       });
 
     assert.equal(createResponse.status, 201);

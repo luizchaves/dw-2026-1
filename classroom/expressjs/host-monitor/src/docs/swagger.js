@@ -31,9 +31,8 @@ const swaggerSpec = {
                   {
                     id: 'cuid123',
                     name: 'Server A',
-                    ip: '192.168.0.10',
-                    os: 'Linux',
-                    group: 'Production',
+                    address: '192.168.0.10',
+                    category: 'Production',
                     status: 'Online',
                     uptime: '24 days',
                   },
@@ -53,9 +52,8 @@ const swaggerSpec = {
               schema: { $ref: '#/components/schemas/HostRequest' },
               example: {
                 name: 'Server A',
-                ip: '192.168.0.10',
-                os: 'Linux',
-                group: 'Production',
+                address: '192.168.0.10',
+                category: 'Production',
                 status: 'Online',
                 uptime: '24 days',
               },
@@ -71,9 +69,8 @@ const swaggerSpec = {
                 example: {
                   id: 'cuid123',
                   name: 'Server A',
-                  ip: '192.168.0.10',
-                  os: 'Linux',
-                  group: 'Production',
+                  address: '192.168.0.10',
+                  category: 'Production',
                   status: 'Online',
                   uptime: '24 days',
                 },
@@ -125,9 +122,8 @@ const swaggerSpec = {
               schema: { $ref: '#/components/schemas/HostRequest' },
               example: {
                 name: 'Server B',
-                ip: '192.168.0.11',
-                os: 'Windows',
-                group: 'Staging',
+                address: '192.168.0.11',
+                category: 'Staging',
                 status: 'Online',
                 uptime: '10 days',
               },
@@ -143,9 +139,8 @@ const swaggerSpec = {
                 example: {
                   id: 'cuid123',
                   name: 'Server B',
-                  ip: '192.168.0.11',
-                  os: 'Windows',
-                  group: 'Staging',
+                  address: '192.168.0.11',
+                  category: 'Staging',
                   status: 'Online',
                   uptime: '10 days',
                 },
@@ -275,12 +270,14 @@ const swaggerSpec = {
       },
       HostRequest: {
         type: 'object',
-        required: ['name', 'ip', 'os', 'group', 'status', 'uptime'],
+        required: ['name', 'address', 'category', 'status', 'uptime'],
         properties: {
           name: { type: 'string' },
-          ip: { type: 'string', format: 'ipv4' },
-          os: { type: 'string' },
-          group: { type: 'string' },
+          address: {
+            type: 'string',
+            description: 'IPv4 ou dominio (ex.: 8.8.8.8 ou google.com)',
+          },
+          category: { type: 'string' },
           status: {
             type: 'string',
             enum: ['Online', 'Manutenção', 'Offline'],

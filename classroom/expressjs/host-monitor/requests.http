@@ -8,9 +8,8 @@ Content-Type: application/json
 
 {
   "name": "New Host",
-  "ip": "192.168.0.99",
-  "os": "Ubuntu 24.04",
-  "group": "Produção",
+  "address": "192.168.0.99",
+  "category": "Produção",
   "status": "Online",
   "uptime": "—"
 }
@@ -24,9 +23,8 @@ Content-Type: application/json
 
 {
   "name": "Other Host",
-  "ip": "192.168.0.91",
-  "os": "Ubuntu 24.04",
-  "group": "Produção",
+  "address": "192.168.0.91",
+  "category": "Produção",
   "status": "Online",
   "uptime": "—"
 }

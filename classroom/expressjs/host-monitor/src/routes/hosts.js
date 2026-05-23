@@ -1,22 +1,13 @@
 import express from 'express';
 import { z } from 'zod';
-import cuid from 'cuid';
 import { HttpError } from '../errors/HttpError.js';
 import { ping } from '../lib/ping.js';
 import { requireJsonContentType } from '../middleware/requireJsonContentType.js';
 import { validateRequest } from '../middleware/validation.js';
 import Host from '../models/Hosts.js';
+import { hostCreateSchema, hostSchema } from '../schemas/host.js';
 import { HostNotFoundError, InvalidHostError } from '../errors/HostError.js';
 const routes = express.Router();
-
-const hostSchema = z.object({
-  name: z.string(),
-  ip: z.ipv4(),
-  os: z.string(),
-  group: z.string(),
-  status: z.enum(['Online', 'Manutenção', 'Offline']),
-  uptime: z.string(),
-});
 
 const mapHostError = (error) => {
   if (error instanceof HostNotFoundError || error instanceof InvalidHostError) {
@@ -29,10 +20,10 @@ const mapHostError = (error) => {
 routes.post(
   '/hosts',
   requireJsonContentType,
-  validateRequest({ body: hostSchema }),
+  validateRequest({ body: hostCreateSchema }),
   async (req, res) => {
     try {
-      const newHost = Host.create({ ...req.body, id: cuid() });
+      const newHost = await Host.create({ ...req.body, status: 'Online' });
 
       res.status(201).json(newHost);
     } catch (error) {
@@ -42,18 +33,18 @@ routes.post(
 );
 
 routes.get('/hosts', async (req, res) => {
-  res.json(Host.read());
+  res.json(await Host.read());
 });
 
 routes.put(
   '/hosts/:id',
   requireJsonContentType,
-  validateRequest({ body: hostSchema, params: z.object({ id: z.cuid() }) }),
+  validateRequest({ body: hostSchema, params: z.object({ id: z.string() }) }),
   async (req, res) => {
     const { id } = req.params;
 
     try {
-      const updatedHost = Host.update({ id, ...req.body });
+      const updatedHost = await Host.update({ id, ...req.body });
 
       res.status(200).json(updatedHost);
     } catch (error) {
@@ -64,12 +55,12 @@ routes.put(
 
 routes.delete(
   '/hosts/:id',
-  validateRequest({ params: z.object({ id: z.cuid() }) }),
+  validateRequest({ params: z.object({ id: z.string() }) }),
   async (req, res) => {
     const { id } = req.params;
 
     try {
-      Host.remove(id);
+      await Host.remove(id);
       res.status(204).send();
     } catch (error) {
       mapHostError(error);
@@ -79,14 +70,14 @@ routes.delete(
 
 routes.get(
   '/hosts/:id/ping',
-  validateRequest({ params: z.object({ id: z.cuid() }) }),
+  validateRequest({ params: z.object({ id: z.string() }) }),
   async (req, res) => {
     const { id } = req.params;
     const { count } = req.query;
 
     let host;
     try {
-      host = Host.readById(id);
+      host = await Host.readById(id);
     } catch (error) {
       mapHostError(error);
     }
@@ -98,7 +89,7 @@ routes.get(
     }
 
     try {
-      const result = await ping(host.ip, parsedCount);
+      const result = await ping(host.address, parsedCount);
 
       res.json(result);
     } catch (error) {
