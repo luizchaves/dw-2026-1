@@ -20,16 +20,20 @@ const hostCreateSchema = z.object({
   category: z.string(),
 });
 
-const hostSchema = z.object({
+const hostUpdateSchema = z.object({
   name: z.string(),
   address: addressSchema,
   category: z.string(),
-  status: z.enum(['Online', 'Manutenção', 'Offline']),
-  uptime: z.string(),
 });
 
-const hostWithIdSchema = hostSchema.extend({
+const hostSchema = hostUpdateSchema.extend({
+  status: z.enum(['Unknown', 'Online', 'Offline']),
+  uptime: z.number().min(0).max(100),
+  lastCheckedAt: z.string().datetime().nullable(),
+});
+
+const hostWithIdSchema = hostUpdateSchema.extend({
   id: z.string(),
 });
 
-export { hostCreateSchema, hostSchema, hostWithIdSchema };
+export { hostCreateSchema, hostUpdateSchema, hostSchema, hostWithIdSchema };

@@ -10,6 +10,17 @@
 
 <body class="bg-slate-100 text-slate-900 min-h-screen">
   <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <nav
+      class="sticky top-0 z-40 mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/90 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+      <a href="/" class="text-sm font-bold tracking-[0.18em] text-slate-900">HOST MONITOR</a>
+      <div class="flex items-center gap-2 text-sm">
+        <a href="/" class="rounded-lg bg-slate-900 px-3 py-2 font-semibold text-white">Hosts</a>
+        <a href="/api/docs"
+          class="rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">API
+          Docs</a>
+      </div>
+    </nav>
+
     <header class="mb-10 text-center">
       <p class="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
         Painel de Hosts
@@ -139,43 +150,79 @@
     function createHostCard(host) {
       let statusClass = '';
       switch (host.status) {
+        case 'Unknown':
+          statusClass = 'bg-indigo-100 text-indigo-700 border-indigo-200';
+          break;
         case 'Online':
-          statusClass = 'bg-emerald-100 text-emerald-700';
+          statusClass = 'bg-emerald-100 text-emerald-700 border-emerald-200';
           break;
         case 'Manutenção':
-          statusClass = 'bg-amber-100 text-amber-700';
+          statusClass = 'bg-amber-100 text-amber-700 border-amber-200';
           break;
         case 'Offline':
-          statusClass = 'bg-slate-100 text-slate-700';
+          statusClass = 'bg-rose-100 text-rose-700 border-rose-200';
           break;
         default:
-          statusClass = 'bg-slate-100 text-slate-700';
+          statusClass = 'bg-slate-100 text-slate-700 border-slate-200';
       }
-      return `<div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md relative group" data-id="${host.id}">
-        <button type="button" aria-label="Excluir host" class="absolute z-10 top-2 right-2 p-2 rounded-full bg-white/80 shadow hover:bg-red-50 focus:bg-red-100 border border-slate-200 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-200 transition delete-host-btn opacity-0 group-hover:opacity-100 group-focus-within:opacity-100" tabindex="0">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="text-slate-400 hover:text-red-600 transition">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" />
-            <line x1="10" y1="11" x2="10" y2="17" />
-            <line x1="14" y1="11" x2="14" y2="17" />
-          </svg>
-        </button>
-        <div>
-          <h2 class="text-xl font-semibold text-slate-900">${host.name}</h2>
-          <div class="flex justify-between">
+
+      const availability = typeof host.uptime === 'number'
+        ? Math.max(0, Math.min(100, host.uptime))
+        : 0;
+
+      const availabilityLabel = typeof host.uptime === 'number'
+        ? `${host.uptime.toFixed(2)}%`
+        : formatUptime(host.uptime);
+
+      let availabilityBarClass = 'bg-slate-300';
+
+      if (availability >= 95) {
+        availabilityBarClass = 'bg-emerald-500';
+      } else if (availability >= 80) {
+        availabilityBarClass = 'bg-amber-500';
+      } else if (availability > 0) {
+        availabilityBarClass = 'bg-rose-500';
+      }
+
+      return `<div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md" data-id="${host.id}">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-slate-900">${host.name}</h2>
             <p class="mt-1 text-sm text-slate-500">Categoria: ${host.category}</p>
-            <span class="rounded-full px-3 py-1 text-xs font-semibold ${statusClass}">${host.status}</span>
           </div>
+          <span class="rounded-full border px-3 py-1 text-xs font-semibold ${statusClass}">${host.status}</span>
         </div>
-        <dl class="mt-6 grid gap-4 text-sm text-slate-600">
-          <div class="flex items-center justify-between">
-            <dt>Endereço</dt>
-            <dd>${host.address}</dd>
+
+        <dl class="mt-5 grid gap-3 text-sm text-slate-700">
+          <div class="rounded-2xl bg-slate-50 px-4 py-3">
+            <dt class="text-xs uppercase tracking-[0.12em] text-slate-500">Endereço</dt>
+            <dd class="mt-1 font-semibold text-slate-900 break-all">${host.address}</dd>
           </div>
-          <div class="flex items-center justify-between">
-            <dt>Uptime</dt>
-            <dd>${formatUptime(host.uptime)}</dd>
+          <div class="rounded-2xl bg-slate-50 px-4 py-3">
+            <div class="flex items-center justify-between">
+              <dt class="text-xs uppercase tracking-[0.12em] text-slate-500">Uptime</dt>
+              <dd class="font-bold text-slate-900">${availabilityLabel}</dd>
+            </div>
+            <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
+              <div class="h-full rounded-full ${availabilityBarClass}" style="width: ${availability}%;"></div>
+            </div>
           </div>
         </dl>
+
+        <div class="mt-5 flex items-center justify-between gap-3">
+          <span class="text-xs text-slate-500">ID: ${host.id.slice(0, 10)}...</span>
+          <div class="flex items-center gap-2">
+            <a href="/host.html?id=${host.id}" class="inline-flex items-center rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400">Ver detalhes</a>
+            <button type="button" aria-label="Excluir host" class="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-200 delete-host-btn" tabindex="0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" />
+                <line x1="10" y1="11" x2="10" y2="17" />
+                <line x1="14" y1="11" x2="14" y2="17" />
+              </svg>
+              Remover
+            </button>
+          </div>
+        </div>
       </div>`;
     }
 

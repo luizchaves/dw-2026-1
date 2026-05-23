@@ -8,7 +8,7 @@ describe('/api/hosts', () => {
   test('POST /api/hosts with valid JSON returns 201', async () => {
     const hostPayload = {
       name: 'Server A',
-      address: '192.168.0.10',
+      address: '127.0.0.1',
       category: 'Production',
     };
 
@@ -22,9 +22,28 @@ describe('/api/hosts', () => {
     assert.equal(response.body.address, hostPayload.address);
     assert.equal(response.body.category, hostPayload.category);
     assert.equal(response.body.status, 'Online');
-    assert.equal(typeof response.body.uptime, 'string');
-    assert.equal(Number.isNaN(Date.parse(response.body.uptime)), false);
+    assert.equal(response.body.uptime, 100);
+    assert.equal(typeof response.body.lastCheckedAt, 'string');
     assert.ok(response.body.id);
+  });
+
+  test('GET /api/hosts/:id returns host details', async () => {
+    const createResponse = await request(app)
+      .post('/api/hosts')
+      .set('Content-Type', 'application/json')
+      .send({
+        name: 'Host Detail',
+        address: '127.0.0.1',
+        category: 'QA',
+      });
+
+    const response = await request(app).get(
+      `/api/hosts/${createResponse.body.id}`
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.id, createResponse.body.id);
+    assert.equal(response.body.name, 'Host Detail');
   });
 
   test('GET /api/hosts returns a list of hosts', async () => {
@@ -52,7 +71,7 @@ describe('/api/hosts', () => {
       .set('Content-Type', 'application/json')
       .send({
         name: 'Server B',
-        address: '192.168.0.11',
+        address: '127.0.0.1',
         category: 'Staging',
       });
 
@@ -60,10 +79,8 @@ describe('/api/hosts', () => {
 
     const updatedPayload = {
       name: 'Server B Updated',
-      address: '192.168.0.11',
+      address: '127.0.0.1',
       category: 'Staging',
-      status: 'Online',
-      uptime: '10 days',
     };
 
     const response = await request(app)
@@ -74,7 +91,7 @@ describe('/api/hosts', () => {
     assert.equal(response.status, 200);
     assert.equal(response.body.id, createResponse.body.id);
     assert.equal(response.body.name, updatedPayload.name);
-    assert.equal(response.body.status, updatedPayload.status);
+    assert.equal(response.body.status, 'Online');
   });
 
   test('DELETE /api/hosts/:id removes a host and returns 204', async () => {
@@ -83,7 +100,7 @@ describe('/api/hosts', () => {
       .set('Content-Type', 'application/json')
       .send({
         name: 'Server C',
-        address: '192.168.0.12',
+        address: '127.0.0.1',
         category: 'Development',
       });
 
@@ -111,10 +128,8 @@ describe('/api/hosts', () => {
       .set('Content-Type', 'application/json')
       .send({
         name: 'Missing Host',
-        address: '192.168.0.13',
+        address: '127.0.0.1',
         category: 'QA',
-        status: 'Online',
-        uptime: '1 day',
       });
 
     assert.equal(response.status, 400);
@@ -141,6 +156,7 @@ describe('/api/hosts/:id/ping', () => {
 
     assert.equal(response.status, 200);
     assert.equal(response.body.host, '127.0.0.1');
+    assert.equal(response.body.reachable, true);
     assert.ok(Array.isArray(response.body.packets));
     assert.equal(response.body.packets.length, 1);
   });
@@ -166,6 +182,7 @@ describe('/api/hosts/:id/ping', () => {
     assert.ok(Array.isArray(response.body.packets));
     assert.equal(response.body.packets.length, 1);
     assert.equal(response.body.statistics.transmitted, 1);
+    assert.equal(response.body.hostStatus.status, 'Online');
   });
 
   test('GET /api/hosts/:id/ping with count=3 returns 200', async () => {
@@ -191,6 +208,29 @@ describe('/api/hosts/:id/ping', () => {
     assert.equal(response.body.statistics.transmitted, 3);
   });
 
+  test('GET /api/hosts/:id/details returns host, history and statistics', async () => {
+    const createResponse = await request(app)
+      .post('/api/hosts')
+      .set('Content-Type', 'application/json')
+      .send({
+        name: 'Host Details Full',
+        address: '127.0.0.1',
+        category: 'Production',
+      });
+
+    const hostId = createResponse.body.id;
+
+    await request(app).get(`/api/hosts/${hostId}/ping?count=1`);
+
+    const response = await request(app).get(`/api/hosts/${hostId}/details`);
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.host.id, hostId);
+    assert.ok(Array.isArray(response.body.history));
+    assert.ok(response.body.history.length >= 1);
+    assert.equal(typeof response.body.statistics.availability, 'number');
+  });
+
   test('GET /api/hosts/:id/ping for unknown host returns 400', async () => {
     const response = await request(app).get(
       '/api/hosts/cj1234567890abcdef123456/ping'
@@ -200,7 +240,7 @@ describe('/api/hosts/:id/ping', () => {
     assert.deepEqual(response.body, { error: 'Host not found' });
   });
 
-  test('GET /api/hosts/:id/ping for unreachable host returns 400', async () => {
+  test('GET /api/hosts/:id/ping for unreachable host returns 200 and marks offline', async () => {
     const createResponse = await request(app)
       .post('/api/hosts')
       .set('Content-Type', 'application/json')
@@ -216,8 +256,10 @@ describe('/api/hosts/:id/ping', () => {
       `/api/hosts/${createResponse.body.id}/ping`
     );
 
-    assert.equal(response.status, 400);
-    assert.deepEqual(response.body, { error: 'Unknown host' });
+    assert.equal(response.status, 200);
+    assert.equal(response.body.reachable, false);
+    assert.equal(response.body.error, 'Unknown host');
+    assert.equal(response.body.hostStatus.status, 'Offline');
   });
 });
 

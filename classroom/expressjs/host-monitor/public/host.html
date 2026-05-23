@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalhes do Host</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-slate-100 text-slate-900">
+  <main class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <nav
+      class="sticky top-0 z-40 mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/90 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+      <a href="/" class="text-sm font-bold tracking-[0.18em] text-slate-900">HOST MONITOR</a>
+      <div class="flex items-center gap-2 text-sm">
+        <a href="/"
+          class="rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">Hosts</a>
+        <span class="rounded-lg bg-slate-900 px-3 py-2 font-semibold text-white">Detalhes</span>
+        <a href="/api/docs"
+          class="rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">API
+          Docs</a>
+      </div>
+    </nav>
+
+    <header class="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Detalhes do host</p>
+        <h1 id="host-name" class="mt-2 text-3xl font-bold tracking-tight text-slate-900">Carregando...</h1>
+        <p id="host-address" class="mt-2 text-sm text-slate-600"></p>
+      </div>
+    </header>
+
+    <section class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Status atual</p>
+        <p id="host-status" class="mt-2 text-2xl font-bold text-slate-900">-</p>
+      </article>
+      <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Disponibilidade</p>
+        <p id="host-uptime" class="mt-2 text-2xl font-bold text-slate-900">-</p>
+      </article>
+      <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Checks totais</p>
+        <p id="total-checks" class="mt-2 text-2xl font-bold text-slate-900">-</p>
+      </article>
+      <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Último check</p>
+        <p id="last-check" class="mt-2 text-sm font-semibold text-slate-900">-</p>
+      </article>
+    </section>
+
+    <section class="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="text-xl font-semibold text-slate-900">Verificação de disponibilidade</h2>
+      <p class="mt-1 text-sm text-slate-500">Execute uma nova verificação manual de ping para atualizar status,
+        disponibilidade e histórico.</p>
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <label for="ping-count" class="text-sm font-medium text-slate-700">Pacotes</label>
+        <input id="ping-count" type="number" min="1" max="10" value="1"
+          class="w-20 rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
+        <button id="run-ping" type="button"
+          class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400">
+          Verificar disponibilidade
+        </button>
+      </div>
+      <p id="ping-feedback" class="mt-3 text-sm text-slate-600"></p>
+    </section>
+
+    <section class="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="text-xl font-semibold text-slate-900">Gráfico de latência e disponibilidade</h2>
+      <p class="mt-1 text-sm text-slate-500">Últimos checks (latência média em ms). Pontos em vermelho representam host
+        offline.</p>
+      <svg id="latency-chart" class="mt-4 h-56 w-full rounded-2xl border border-slate-200 bg-slate-50"
+        viewBox="0 0 800 260" role="img" aria-label="Gráfico de latência"></svg>
+    </section>
+
+    <section class="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="text-xl font-semibold text-slate-900">Histórico de ping</h2>
+      <p class="mt-1 text-sm text-slate-500">Últimas verificações de disponibilidade do host.</p>
+      <div class="mt-4 overflow-x-auto">
+        <table class="min-w-full border-collapse text-left text-sm">
+          <thead>
+            <tr class="border-b border-slate-200 text-slate-500">
+              <th class="px-2 py-2 font-semibold">Data</th>
+              <th class="px-2 py-2 font-semibold">Status</th>
+              <th class="px-2 py-2 font-semibold">Transm.</th>
+              <th class="px-2 py-2 font-semibold">Receb.</th>
+              <th class="px-2 py-2 font-semibold">Média (ms)</th>
+              <th class="px-2 py-2 font-semibold">Erro</th>
+            </tr>
+          </thead>
+          <tbody id="history-table"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    const hostName = document.getElementById('host-name');
+    const hostAddress = document.getElementById('host-address');
+    const hostStatus = document.getElementById('host-status');
+    const hostUptime = document.getElementById('host-uptime');
+    const totalChecks = document.getElementById('total-checks');
+    const lastCheck = document.getElementById('last-check');
+    const historyTable = document.getElementById('history-table');
+    const pingFeedback = document.getElementById('ping-feedback');
+    const runPingButton = document.getElementById('run-ping');
+    const pingCountInput = document.getElementById('ping-count');
+    const latencyChart = document.getElementById('latency-chart');
+
+    const params = new URLSearchParams(window.location.search);
+    const hostId = params.get('id');
+
+    if (!hostId) {
+      hostName.textContent = 'Host inválido';
+      pingFeedback.textContent = 'O parâmetro id é obrigatório na URL.';
+      runPingButton.disabled = true;
+      runPingButton.classList.add('opacity-50', 'cursor-not-allowed');
+      throw new Error('Missing host id');
+    }
+
+    function formatDate(value) {
+      if (!value) {
+        return '-';
+      }
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+
+      return date.toLocaleString('pt-BR');
+    }
+
+    function renderHistory(history) {
+      historyTable.innerHTML = '';
+
+      if (!history.length) {
+        historyTable.innerHTML = '<tr><td colspan="6" class="px-2 py-6 text-center text-slate-500">Nenhum ping registrado ainda.</td></tr>';
+        return;
+      }
+
+      history.forEach((entry) => {
+        const status = entry.reachable ? 'Online' : 'Offline';
+        const statusClasses = entry.reachable
+          ? 'bg-emerald-100 text-emerald-700'
+          : 'bg-rose-100 text-rose-700';
+
+        historyTable.insertAdjacentHTML(
+          'beforeend',
+          `<tr class="border-b border-slate-100">
+            <td class="px-2 py-2">${formatDate(entry.checkedAt)}</td>
+            <td class="px-2 py-2"><span class="rounded-full px-2 py-1 text-xs font-semibold ${statusClasses}">${status}</span></td>
+            <td class="px-2 py-2">${entry.transmitted}</td>
+            <td class="px-2 py-2">${entry.received}</td>
+            <td class="px-2 py-2">${entry.avgMs === null ? '-' : Number(entry.avgMs).toFixed(3)}</td>
+            <td class="px-2 py-2 text-rose-700">${entry.error ?? '-'}</td>
+          </tr>`
+        );
+      });
+    }
+
+    function renderChart(history) {
+      const width = 800;
+      const height = 260;
+      const padding = 40;
+      const chartWidth = width - padding * 2;
+      const chartHeight = height - padding * 2;
+      const plotted = history
+        .slice()
+        .reverse()
+        .map((entry) => ({
+          ...entry,
+          latency: entry.avgMs === null ? 0 : Number(entry.avgMs),
+        }));
+
+      latencyChart.innerHTML = '';
+
+      latencyChart.insertAdjacentHTML(
+        'beforeend',
+        `<line x1="${padding}" y1="${padding}" x2="${padding}" y2="${height - padding}" stroke="#94a3b8" stroke-width="1" />
+         <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#94a3b8" stroke-width="1" />`
+      );
+
+      if (!plotted.length) {
+        latencyChart.insertAdjacentHTML(
+          'beforeend',
+          `<text x="${width / 2}" y="${height / 2}" text-anchor="middle" fill="#64748b" font-size="16">Sem dados para exibir</text>`
+        );
+        return;
+      }
+
+      const maxLatency = Math.max(...plotted.map((entry) => entry.latency), 1);
+      const points = plotted.map((entry, index) => {
+        const x =
+          plotted.length === 1
+            ? padding + chartWidth / 2
+            : padding + (index / (plotted.length - 1)) * chartWidth;
+        const y = height - padding - (entry.latency / maxLatency) * chartHeight;
+
+        return { ...entry, x, y };
+      });
+
+      const polyline = points.map((point) => `${point.x},${point.y}`).join(' ');
+      latencyChart.insertAdjacentHTML(
+        'beforeend',
+        `<polyline fill="none" stroke="#0f172a" stroke-width="2" points="${polyline}" />`
+      );
+
+      points.forEach((point) => {
+        const color = point.reachable ? '#059669' : '#dc2626';
+        latencyChart.insertAdjacentHTML(
+          'beforeend',
+          `<circle cx="${point.x}" cy="${point.y}" r="4" fill="${color}">
+             <title>${formatDate(point.checkedAt)} • ${point.reachable ? 'Online' : 'Offline'} • ${point.latency.toFixed(3)}ms</title>
+           </circle>`
+        );
+      });
+
+      latencyChart.insertAdjacentHTML(
+        'beforeend',
+        `<text x="${padding}" y="${padding - 10}" fill="#475569" font-size="12">${maxLatency.toFixed(2)} ms</text>
+         <text x="${width - padding}" y="${height - padding + 20}" text-anchor="end" fill="#475569" font-size="12">Checks recentes</text>`
+      );
+    }
+
+    function renderDetails(payload) {
+      const { host, statistics, history } = payload;
+
+      hostName.textContent = host.name;
+      hostAddress.textContent = `${host.address} • ${host.category}`;
+      hostStatus.textContent = host.status;
+      hostUptime.textContent = `${Number(host.uptime ?? 0).toFixed(2)}%`;
+      totalChecks.textContent = String(statistics.totalChecks ?? 0);
+      lastCheck.textContent = formatDate(statistics.lastCheckAt);
+      renderHistory(history);
+      renderChart(history);
+    }
+
+    async function loadDetails() {
+      const response = await fetch(`/api/hosts/${hostId}/details?limit=30`);
+
+      if (!response.ok) {
+        throw new Error('Não foi possível carregar os detalhes do host.');
+      }
+
+      const payload = await response.json();
+      renderDetails(payload);
+    }
+
+    runPingButton.addEventListener('click', async () => {
+      const count = Number(pingCountInput.value);
+
+      if (Number.isNaN(count) || count < 1) {
+        pingFeedback.textContent = 'Informe um valor de count válido (maior que 0).';
+        return;
+      }
+
+      runPingButton.disabled = true;
+      runPingButton.classList.add('opacity-50', 'cursor-not-allowed');
+      pingFeedback.textContent = 'Executando ping...';
+
+      try {
+        const response = await fetch(`/api/hosts/${hostId}/ping?count=${count}`);
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Erro ao executar ping.');
+        }
+
+        pingFeedback.textContent = result.reachable
+          ? `Ping realizado com sucesso em ${formatDate(result.checkedAt)}.`
+          : `Host indisponível em ${formatDate(result.checkedAt)}: ${result.error}`;
+
+        await loadDetails();
+      } catch (error) {
+        pingFeedback.textContent = error.message;
+      } finally {
+        runPingButton.disabled = false;
+        runPingButton.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    });
+
+    try {
+      await loadDetails();
+    } catch (error) {
+      hostName.textContent = 'Erro ao carregar host';
+      pingFeedback.textContent = error.message;
+      runPingButton.disabled = true;
+      runPingButton.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+  </script>
+</body>
+
+</html>

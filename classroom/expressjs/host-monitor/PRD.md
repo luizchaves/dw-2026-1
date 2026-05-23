@@ -2,204 +2,243 @@
 
 ## 1. Visão Geral
 
-Host Monitor é uma aplicação web com API REST e interface web para cadastro, consulta, atualização, remoção e verificação de disponibilidade (ping) de hosts.
+Host Monitor é uma aplicação web com API REST e frontend estático para cadastro de hosts, verificação de disponibilidade e visualização de histórico e estatísticas de ping.
 
-O produto atende um contexto educacional e de laboratório para praticar:
+O produto atende um contexto educacional para prática de:
 
-- desenvolvimento backend com Express
-- persistência em SQLite
-- validação de entrada
-- testes de API e frontend
-- documentação com OpenAPI/Swagger
+- backend com Express
+- persistência com SQLite
+- validação de payload com Zod
+- testes automatizados de API e frontend
+- documentação OpenAPI/Swagger
 
 ## 2. Problema
 
-Sem uma base única para requisitos, o projeto pode evoluir com comportamento inconsistente entre API, frontend, testes e ambiente de execução.
+Sem centralização de requisitos, a evolução do projeto pode gerar inconsistência entre API, frontend e testes.
 
-Também existe risco de mistura de dados entre desenvolvimento e testes quando ambos usam o mesmo banco.
+Também há risco de decisões frágeis de monitoramento quando não existe histórico de disponibilidade por host.
 
 ## 3. Objetivos
 
-1. Disponibilizar CRUD completo de hosts com validação.
-2. Expor endpoint de ping por host para monitoramento básico.
-3. Manter interface web simples para operações principais.
-4. Garantir isolamento de banco por ambiente (`development`, `test`, `production`).
-5. Assegurar cobertura funcional mínima via testes automatizados.
+1. Disponibilizar CRUD de hosts com validação.
+2. Coletar disponibilidade real por ping (incluindo no momento da criação do host).
+3. Expor histórico de verificações e estatísticas agregadas de disponibilidade.
+4. Oferecer página de detalhes com histórico tabular, gráfico de latência e ação manual de ping.
+5. Manter isolamento de banco por ambiente (`development`, `test`, `production`).
 
 ## 4. Escopo
 
 ### 4.1 Em escopo
 
 - API REST para hosts.
-- Endpoint de ping por host com parâmetro de contagem.
-- Frontend web para listar e cadastrar hosts.
-- Persistência local com SQLite.
+- Ping por host com persistência de histórico.
+- Estatísticas de disponibilidade e latência agregadas por host.
+- Frontend com:
+  - listagem e cadastro de hosts
+  - página de detalhes por host
+  - histórico de ping
+  - gráfico de latência/disponibilidade
+  - ação manual de nova verificação
 - Documentação Swagger.
 - Testes automatizados de API e frontend.
-- Docker Compose para execução em desenvolvimento e produção.
 
 ### 4.2 Fora de escopo (nesta fase)
 
-- Autenticação e autorização de usuários.
+- Autenticação/autorização.
+- Alertas automáticos (email/webhook/SMS).
 - Multi-tenant.
-- Banco relacional externo (PostgreSQL/MySQL).
-- Dashboard avançado de métricas históricas.
-- Alertas (email, webhook, SMS).
+- Banco externo (PostgreSQL/MySQL).
+- Histórico de longo prazo com retenção configurável.
 
 ## 5. Personas
 
-1. Estudante de desenvolvimento web: precisa entender fluxo completo API + UI + testes.
-2. Instrutor: precisa validar rapidamente funcionalidades e boas práticas.
-3. Desenvolvedor iniciante: precisa de base clara para evolução incremental.
+1. Estudante de web backend/frontend: precisa entender fluxo completo API + UI + testes.
+2. Instrutor/monitor: precisa validar comportamento de disponibilidade e qualidade.
+3. Desenvolvedor iniciante: precisa de base simples para evoluir funcionalidades.
 
 ## 6. Requisitos Funcionais
 
-### RF-01 - Criar host
+### RF-01 - Criar host com check inicial
 
 - Método: `POST /api/hosts`
 - Entrada: `name`, `address`, `category` (JSON)
-- Saída: host criado com `id`, `status`, `uptime`
+- Saída: host criado com `id`, `status`, `uptime`, `lastCheckedAt`
+- Regra: após criar, o sistema executa ping inicial e persiste o resultado no histórico.
 
 ### RF-02 - Listar hosts
 
 - Método: `GET /api/hosts`
-- Saída: lista de hosts
+- Saída: lista com status e uptime atuais de cada host.
 
-### RF-03 - Atualizar host
+### RF-03 - Buscar host por ID
+
+- Método: `GET /api/hosts/:id`
+- Saída: dados completos do host.
+
+### RF-04 - Atualizar host
 
 - Método: `PUT /api/hosts/:id`
-- Entrada: campos atualizáveis
-- Saída: host atualizado
+- Entrada: campos editáveis (`name`, `address`, `category`)
+- Saída: host atualizado.
 
-### RF-04 - Remover host
+### RF-05 - Remover host
 
 - Método: `DELETE /api/hosts/:id`
-- Saída: `204 No Content`
+- Saída: `204 No Content`.
 
-### RF-05 - Consultar ping de host
+### RF-06 - Executar ping manual
 
 - Método: `GET /api/hosts/:id/ping`
 - Query opcional: `count`
-- Saída: informações de pacotes e estatísticas de ping
+- Saída: resultado de ping + metadados de disponibilidade
+- Regra: toda execução de ping deve persistir um novo registro de histórico e atualizar status/uptime do host.
 
-### RF-06 - Validar erros de entrada
+### RF-07 - Consultar detalhes completos
 
-- Conteúdo inválido, host inexistente e falhas de negócio devem retornar JSON de erro com status adequado.
+- Método: `GET /api/hosts/:id/details`
+- Saída:
+  - host
+  - estatísticas agregadas (`totalChecks`, `availability`, latências)
+  - histórico recente de ping.
 
-### RF-07 - Documentação da API
+### RF-08 - Consultar histórico de ping
 
-- Expor `GET /api/docs` e `GET /api/docs.json`.
+- Método: `GET /api/hosts/:id/history`
+- Saída: lista de checks com data, sucesso/falha, métricas e erro.
 
-### RF-08 - Interface web básica
+### RF-09 - Documentação da API
 
-- Renderizar hosts existentes.
-- Permitir criação de host por formulário.
+- Endpoints:
+  - `GET /api/docs`
+  - `GET /api/docs.json`
 
-### RF-09 - Isolamento de banco por ambiente
+### RF-10 - Frontend de listagem
 
-- `NODE_ENV=test` -> `src/database/db.test.sqlite`
-- `NODE_ENV=development` -> `src/database/db.dev.sqlite`
-- `NODE_ENV=production` -> `src/database/db.sqlite`
+- Página principal deve:
+  - listar hosts
+  - abrir modal de criação
+  - permitir remoção
+  - navegar para detalhes por host.
+
+### RF-11 - Frontend de detalhes
+
+- Página de host deve:
+  - mostrar dados principais (status, uptime, checks, último check)
+  - executar verificação manual de disponibilidade
+  - exibir histórico tabular
+  - exibir gráfico de latência/disponibilidade.
 
 ## 7. Requisitos Não Funcionais
 
 ### RNF-01 - Qualidade
 
-- Testes de API e frontend devem executar com sucesso via `npm test`.
+- `npm run test:api` e `npm run test:front` devem passar.
 
 ### RNF-02 - Observabilidade básica
 
-- Logs HTTP habilitados no servidor.
+- Logs HTTP habilitados com morgan.
 
 ### RNF-03 - Portabilidade
 
-- Projeto executável localmente com Node.js e via Docker Compose.
+- Execução local com Node.js e containerizada via Docker Compose.
 
-### RNF-04 - Consistência de ambiente
+### RNF-04 - Consistência de ambientes
 
-- Scripts de teste devem limpar banco de teste antes da execução.
+- Banco segregado por `NODE_ENV`.
+- Testes de API limpam banco de teste antes de executar.
 
-### RNF-05 - Simplicidade de manutenção
+### RNF-05 - Manutenibilidade
 
-- Código modular por camadas (rotas, modelos, middleware, database).
+- Código modular por camadas (rotas, modelo, middleware, database, docs, tests).
 
 ## 8. Regras de Negócio
 
-1. Host precisa de identificador único.
-2. Filtros de consulta aceitam apenas campos permitidos.
-3. Ping só pode ser executado para host existente.
-4. Erros de host não encontrado devem retornar mensagem consistente.
+1. Cada host possui ID único.
+2. Status permitido de host: `Unknown`, `Online`, `Offline`.
+3. Uptime é disponibilidade percentual (0 a 100), derivada do histórico de checks.
+4. Ping para host inexistente deve retornar erro de domínio.
+5. Falha de ping em host existente deve registrar check offline no histórico.
 
 ## 9. Fluxos Principais
 
-### Fluxo A - Cadastro e visualização
+### Fluxo A - Cadastro com disponibilidade inicial
 
-1. Usuário abre a interface web.
-2. Sistema carrega hosts existentes.
-3. Usuário envia formulário de novo host.
-4. API persiste host e retorna dados atualizados.
-5. UI atualiza grade/listagem.
+1. Usuário cadastra host na página principal.
+2. API cria host.
+3. API executa ping inicial automaticamente.
+4. API registra histórico inicial e atualiza status/uptime.
+5. Frontend exibe host já com estado atualizado.
 
-### Fluxo B - Validação de host
+### Fluxo B - Verificação manual em detalhes
 
-1. Usuário solicita ping de um host.
-2. API valida existência do host.
-3. API executa ping com `count` padrão ou informado.
-4. API retorna pacotes e estatísticas.
+1. Usuário abre página de detalhes do host.
+2. Frontend carrega `/details` (host + histórico + estatísticas).
+3. Usuário clica em verificar disponibilidade.
+4. API executa ping e persiste novo check.
+5. Frontend recarrega detalhes, tabela e gráfico.
 
 ## 10. Critérios de Aceite
 
-1. CRUD de hosts funcional com códigos HTTP esperados.
-2. Endpoint de ping funcionando para host válido e retornando erro para host inválido/inacessível.
-3. Documentação Swagger acessível.
-4. `npm run test:api` e `npm run test:front` com 100% dos testes existentes passando.
-5. Testes não devem escrever em banco de desenvolvimento/produção.
-6. Docker Compose de desenvolvimento e produção devem iniciar sem ajuste manual de banco.
+1. Cadastro de host dispara ping inicial automaticamente.
+2. Endpoints `/details` e `/history` retornam payload conforme contrato.
+3. Página de detalhes exibe histórico e gráfico sem erro para host válido.
+4. Botão de verificação manual atualiza dados após execução.
+5. Listagem mantém link de detalhes e ação de remoção por card.
+6. `npm run test:api` e `npm run test:front` passam integralmente.
 
 ## 11. Riscos e Mitigações
 
-1. Risco: flakiness em testes de ping por dependência de rede/ICMP.
+1. Risco: lentidão de testes com hosts indisponíveis.
 
-- Mitigação: manter casos deterministas e considerar mocks para cenário CI restrito.
+- Mitigação: manter cenários mínimos e usar endereços estáveis para casos de sucesso.
 
-2. Risco: crescimento do escopo sem controle.
+2. Risco: divergência entre contrato da API e frontend.
 
-- Mitigação: manter backlog priorizado por fases.
+- Mitigação: reforçar testes de integração e atualizar Swagger junto com mudanças.
 
-3. Risco: regressão em validações de entrada.
+3. Risco: crescimento de histórico impactar performance no SQLite.
 
-- Mitigação: ampliar testes de contrato da API.
+- Mitigação: índice por `host_id` e `checked_at` + paginação/limite por query.
 
 ## 12. Métricas de Sucesso
 
-1. Taxa de sucesso dos testes em CI/local >= 95%.
-2. Tempo médio para executar suíte completa de testes em ambiente local dentro de limite aceitável para feedback rápido.
-3. Zero incidentes de contaminação entre banco de teste e banco de desenvolvimento.
+1. Taxa de sucesso da suíte automatizada >= 95%.
+2. Zero contaminação entre banco de teste e banco de desenvolvimento.
+3. Disponibilidade e histórico exibidos de forma consistente após cada ping manual.
 
 ## 13. Plano de Entrega (alto nível)
 
-### Fase 1 - Base funcional (concluída)
+### Fase 1 - Base CRUD + docs + testes (concluída)
 
-- Estrutura API + CRUD + Swagger + testes iniciais.
+- API de hosts
+- frontend básico de listagem/cadastro
+- Swagger e testes iniciais
 
-### Fase 2 - Isolamento de ambientes (concluída)
+### Fase 2 - Banco por ambiente (concluída)
 
-- Seleção de banco por `NODE_ENV`.
-- Limpeza automática do banco de teste.
+- mapeamento por `NODE_ENV`
+- limpeza automática do banco de teste
 
-### Fase 3 - Evolução sugerida
+### Fase 3 - Monitoramento por host (concluída)
 
-- Melhorias de UX no frontend.
-- Cobertura de testes de cenários negativos.
-- Pipeline CI com execução automática de testes.
+- histórico de ping (`ping_checks`)
+- status/uptime derivados
+- endpoints de details/history
+- página de detalhes com tabela e gráfico
+
+### Fase 4 - Evolução sugerida
+
+- filtros avançados e ordenação na UI
+- retenção de histórico configurável
+- pipeline CI com execução automática de testes
 
 ## 14. Dependências
 
 - Node.js
 - npm
-- SQLite (módulo nativo Node `node:sqlite`)
+- SQLite (módulo nativo `node:sqlite`)
 - Express, Zod, Supertest, Vitest
-- Docker e Docker Compose (opcional para execução containerizada)
+- Docker e Docker Compose
 
 ## 15. Stakeholders
 

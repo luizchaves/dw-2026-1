@@ -12,7 +12,7 @@ const swaggerSpec = {
       description: 'Servidor local',
     },
   ],
-  tags: [{ name: 'Hosts' }, { name: 'Ping' }],
+  tags: [{ name: 'Hosts' }, { name: 'Ping' }, { name: 'History' }],
   paths: {
     '/api/hosts': {
       get: {
@@ -33,8 +33,9 @@ const swaggerSpec = {
                     name: 'Server A',
                     address: '192.168.0.10',
                     category: 'Production',
-                    status: 'Online',
-                    uptime: '24 days',
+                    status: 'Unknown',
+                    uptime: 0,
+                    lastCheckedAt: null,
                   },
                 ],
               },
@@ -54,8 +55,6 @@ const swaggerSpec = {
                 name: 'Server A',
                 address: '192.168.0.10',
                 category: 'Production',
-                status: 'Online',
-                uptime: '24 days',
               },
             },
           },
@@ -71,8 +70,9 @@ const swaggerSpec = {
                   name: 'Server A',
                   address: '192.168.0.10',
                   category: 'Production',
-                  status: 'Online',
-                  uptime: '24 days',
+                  status: 'Unknown',
+                  uptime: 0,
+                  lastCheckedAt: null,
                 },
               },
             },
@@ -112,6 +112,29 @@ const swaggerSpec = {
           description: 'ID do host',
         },
       ],
+      get: {
+        tags: ['Hosts'],
+        summary: 'Busca detalhes de um host pelo ID',
+        responses: {
+          200: {
+            description: 'Host encontrado',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/HostResponse' },
+              },
+            },
+          },
+          400: {
+            description: 'Host não encontrado',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ErrorResponse' },
+                example: { error: 'Host not found' },
+              },
+            },
+          },
+        },
+      },
       put: {
         tags: ['Hosts'],
         summary: 'Atualiza um host existente',
@@ -124,8 +147,6 @@ const swaggerSpec = {
                 name: 'Server B',
                 address: '192.168.0.11',
                 category: 'Staging',
-                status: 'Online',
-                uptime: '10 days',
               },
             },
           },
@@ -141,8 +162,9 @@ const swaggerSpec = {
                   name: 'Server B',
                   address: '192.168.0.11',
                   category: 'Staging',
-                  status: 'Online',
-                  uptime: '10 days',
+                  status: 'Unknown',
+                  uptime: 0,
+                  lastCheckedAt: null,
                 },
               },
             },
@@ -180,6 +202,46 @@ const swaggerSpec = {
               'application/json': {
                 schema: { $ref: '#/components/schemas/ErrorResponse' },
                 example: { error: 'Host not found' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/hosts/{id}/details': {
+      get: {
+        tags: ['History'],
+        summary: 'Retorna detalhes do host com histórico e estatísticas',
+        parameters: [
+          {
+            in: 'path',
+            name: 'id',
+            required: true,
+            schema: { type: 'string' },
+            description: 'ID do host',
+          },
+          {
+            in: 'query',
+            name: 'limit',
+            required: false,
+            schema: { type: 'integer', default: 20 },
+            description: 'Quantidade de itens do histórico',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Detalhes do host retornados com sucesso',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/HostDetailsResponse' },
+              },
+            },
+          },
+          400: {
+            description: 'Host não encontrado',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ErrorResponse' },
               },
             },
           },
@@ -270,7 +332,7 @@ const swaggerSpec = {
       },
       HostRequest: {
         type: 'object',
-        required: ['name', 'address', 'category', 'status', 'uptime'],
+        required: ['name', 'address', 'category'],
         properties: {
           name: { type: 'string' },
           address: {
@@ -278,24 +340,38 @@ const swaggerSpec = {
             description: 'IPv4 ou dominio (ex.: 8.8.8.8 ou google.com)',
           },
           category: { type: 'string' },
+        },
+      },
+      HostStatus: {
+        type: 'object',
+        required: ['status', 'uptime', 'lastCheckedAt'],
+        properties: {
           status: {
             type: 'string',
-            enum: ['Online', 'Manutenção', 'Offline'],
+            enum: ['Unknown', 'Online', 'Offline'],
           },
-          uptime: { type: 'string' },
+          uptime: { type: 'number' },
+          lastCheckedAt: {
+            type: 'string',
+            nullable: true,
+          },
         },
       },
       HostResponse: {
-        allOf: [
-          { $ref: '#/components/schemas/HostRequest' },
-          {
-            type: 'object',
-            required: ['id'],
-            properties: {
-              id: { type: 'string' },
-            },
+        type: 'object',
+        required: ['id', 'name', 'address', 'category', 'status', 'uptime'],
+        properties: {
+          id: { type: 'string' },
+          name: { type: 'string' },
+          address: { type: 'string' },
+          category: { type: 'string' },
+          status: { type: 'string' },
+          uptime: { type: 'number' },
+          lastCheckedAt: {
+            type: 'string',
+            nullable: true,
           },
-        ],
+        },
       },
       PingPacket: {
         type: 'object',
@@ -321,13 +397,61 @@ const swaggerSpec = {
         type: 'object',
         properties: {
           host: { type: 'string' },
-          ip: { type: 'string' },
+          ip: { type: 'string', nullable: true },
           packets: {
             type: 'array',
             items: { $ref: '#/components/schemas/PingPacket' },
           },
           statistics: { $ref: '#/components/schemas/PingStatistics' },
           output: { type: 'string' },
+          reachable: { type: 'boolean' },
+          error: {
+            type: 'string',
+            nullable: true,
+          },
+          checkedAt: { type: 'string' },
+          hostStatus: { $ref: '#/components/schemas/HostStatus' },
+        },
+      },
+      PingHistoryItem: {
+        type: 'object',
+        properties: {
+          id: { type: 'integer' },
+          checkedAt: { type: 'string' },
+          reachable: { type: 'boolean' },
+          transmitted: { type: 'integer' },
+          received: { type: 'integer' },
+          minMs: { type: 'number', nullable: true },
+          avgMs: { type: 'number', nullable: true },
+          maxMs: { type: 'number', nullable: true },
+          stddevMs: { type: 'number', nullable: true },
+          error: { type: 'string', nullable: true },
+        },
+      },
+      HostAvailabilityStatistics: {
+        type: 'object',
+        properties: {
+          totalChecks: { type: 'integer' },
+          successfulChecks: { type: 'integer' },
+          failedChecks: { type: 'integer' },
+          availability: { type: 'number' },
+          averageLatency: { type: 'number', nullable: true },
+          minLatency: { type: 'number', nullable: true },
+          maxLatency: { type: 'number', nullable: true },
+          lastCheckAt: { type: 'string', nullable: true },
+        },
+      },
+      HostDetailsResponse: {
+        type: 'object',
+        properties: {
+          host: { $ref: '#/components/schemas/HostResponse' },
+          statistics: {
+            $ref: '#/components/schemas/HostAvailabilityStatistics',
+          },
+          history: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/PingHistoryItem' },
+          },
         },
       },
     },

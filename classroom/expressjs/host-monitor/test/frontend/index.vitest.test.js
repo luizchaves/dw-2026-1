@@ -42,11 +42,7 @@ function createFetchMock(initialHosts = []) {
     }
 
     if (url.startsWith('/api/hosts/') && method === 'DELETE') {
-      const hostId = url.split('/').pop();
-      const index = hosts.findIndex((host) => host.id === hostId);
-      if (index >= 0) {
-        hosts.splice(index, 1);
-      }
+      // The backend only acknowledges deletion; UI updates its own local array.
       return createJsonResponse({}, true, 204);
     }
 
@@ -101,6 +97,51 @@ describe('public/index.html', () => {
     assert.match(cardText, /Google DNS/);
     assert.match(cardText, /Categoria:\s*DNS/);
     assert.match(cardText, /8\.8\.8\.8/);
+
+    const detailsLink = dom.window.document.querySelector(
+      'a[href="/host.html?id=h-1"]'
+    );
+    assert.ok(detailsLink, 'Expected details link for host card');
+
+    const deleteButton = dom.window.document.querySelector(
+      '[data-id="h-1"] .delete-host-btn'
+    );
+    assert.ok(deleteButton, 'Expected remove button for host card');
+
+    dom.window.close();
+  });
+
+  test('remove host do grid ao clicar em Remover', async () => {
+    const { dom, fetchMock } = await bootstrapPage([
+      {
+        id: 'h-1',
+        name: 'Google DNS',
+        address: '8.8.8.8',
+        category: 'DNS',
+        status: 'Online',
+        uptime: new Date(Date.now() - 60_000).toISOString(),
+      },
+    ]);
+
+    const removeButton = dom.window.document.querySelector(
+      '[data-id="h-1"] .delete-host-btn'
+    );
+    assert.ok(removeButton, 'Expected remove button to exist before deletion');
+
+    removeButton.click();
+
+    await Promise.resolve();
+    await Promise.resolve();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const deleteCall = fetchMock.mock.calls.find(
+      ([url, options]) =>
+        url === '/api/hosts/h-1' && options?.method === 'DELETE'
+    );
+    assert.ok(deleteCall, 'Expected DELETE /api/hosts/h-1 call');
+
+    const removedCard = dom.window.document.querySelector('[data-id="h-1"]');
+    assert.equal(removedCard, null);
 
     dom.window.close();
   });
