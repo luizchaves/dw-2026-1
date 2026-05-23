@@ -4,13 +4,13 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "test": "npm run test:api && npm run test:front",
-    "test:api": "node --test test/api/*.test.js",
+    "test:api": "NODE_ENV=test node src/database/drop.js && NODE_ENV=test node --test test/api/*.test.js",
     "test:front": "vitest run test/frontend",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:reload": "npm run db:drop && npm run db:load",
     "db:load": "node src/database/load.js",
-    "db:drop": "rm src/database/db.sqlite"
+    "db:drop": "node src/database/drop.js"
   },
   "dependencies": {
     "cuid": "^3.0.0",

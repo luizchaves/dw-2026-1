@@ -41,6 +41,12 @@ Executar a bateria de testes automatizados:
 npm test
 ```
 
+Os testes de API rodam em banco separado automaticamente (`NODE_ENV=test`):
+
+- test: `src/database/db.test.sqlite`
+- development: `src/database/db.dev.sqlite`
+- production: `src/database/db.sqlite`
+
 Servidor padrão:
 
 - `http://localhost:3000`

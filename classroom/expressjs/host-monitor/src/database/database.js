@@ -1,7 +1,7 @@
-import { resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import getDatabaseFile from './dbFile.js';
 
-const dbFile = resolve('src', 'database', 'db.sqlite');
+const dbFile = getDatabaseFile();
 
 function parseParams(params = []) {
   return Array.isArray(params) ? params : [params];

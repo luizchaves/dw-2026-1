@@ -3,5 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    environment:
+      NODE_ENV: development
     volumes:
       - ./src:/app/src
