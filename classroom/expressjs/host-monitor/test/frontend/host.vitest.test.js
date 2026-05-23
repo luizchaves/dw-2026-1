@@ -147,10 +147,15 @@ describe('public/host.html', () => {
       dom.window.document.querySelectorAll('#history-table tr');
     assert.equal(historyRows.length, 2);
 
-    const chartPoints = dom.window.document.querySelectorAll(
-      '#latency-chart circle'
+    const chartBars = dom.window.document.querySelectorAll(
+      '#latency-chart rect'
     );
-    assert.equal(chartPoints.length, 2);
+    assert.equal(chartBars.length, 2);
+
+    const timelineBars = dom.window.document.querySelectorAll(
+      '#check-timeline-chart rect'
+    );
+    assert.equal(timelineBars.length, 2);
 
     dom.window.close();
   });

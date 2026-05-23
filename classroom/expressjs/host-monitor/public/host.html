@@ -68,10 +68,21 @@
 
     <section class="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <h2 class="text-xl font-semibold text-slate-900">Gráfico de latência e disponibilidade</h2>
-      <p class="mt-1 text-sm text-slate-500">Últimos checks (latência média em ms). Pontos em vermelho representam host
+      <p class="mt-1 text-sm text-slate-500">Últimos checks (latência média em ms). Barras em vermelho representam host
         offline.</p>
       <svg id="latency-chart" class="mt-4 h-56 w-full rounded-2xl border border-slate-200 bg-slate-50"
         viewBox="0 0 800 260" role="img" aria-label="Gráfico de latência"></svg>
+    </section>
+
+    <section class="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="text-xl font-semibold text-slate-900">Timeline de checks de ping</h2>
+      <p class="mt-1 text-sm text-slate-500">Cada barra representa um check de ping (inspirado em páginas de status). Verde indica sucesso e vermelho indica indisponibilidade.</p>
+      <div class="mt-3 flex items-center gap-4 text-xs text-slate-600">
+        <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-emerald-500"></span> Online</span>
+        <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-rose-500"></span> Offline</span>
+      </div>
+      <svg id="check-timeline-chart" class="mt-4 h-20 w-full rounded-2xl border border-slate-200 bg-slate-50"
+        viewBox="0 0 800 120" role="img" aria-label="Timeline de checks"></svg>
     </section>
 
     <section class="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -107,6 +118,7 @@
     const runPingButton = document.getElementById('run-ping');
     const pingCountInput = document.getElementById('ping-count');
     const latencyChart = document.getElementById('latency-chart');
+    const checkTimelineChart = document.getElementById('check-timeline-chart');
 
     const params = new URLSearchParams(window.location.search);
     const hostId = params.get('id');
@@ -164,7 +176,7 @@
     function renderChart(history) {
       const width = 800;
       const height = 260;
-      const padding = 40;
+      const padding = 28;
       const chartWidth = width - padding * 2;
       const chartHeight = height - padding * 2;
       const plotted = history
@@ -192,29 +204,29 @@
       }
 
       const maxLatency = Math.max(...plotted.map((entry) => entry.latency), 1);
-      const points = plotted.map((entry, index) => {
-        const x =
-          plotted.length === 1
-            ? padding + chartWidth / 2
-            : padding + (index / (plotted.length - 1)) * chartWidth;
-        const y = height - padding - (entry.latency / maxLatency) * chartHeight;
+      const slotWidth = chartWidth / plotted.length;
+      const barWidth = Math.max(Math.min(slotWidth * 0.6, 32), 8);
 
-        return { ...entry, x, y };
+      const bars = plotted.map((entry, index) => {
+        const barHeight = (entry.latency / maxLatency) * chartHeight;
+        const x = padding + index * slotWidth + (slotWidth - barWidth) / 2;
+        const y = height - padding - barHeight;
+
+        return {
+          ...entry,
+          x,
+          y,
+          barHeight,
+        };
       });
 
-      const polyline = points.map((point) => `${point.x},${point.y}`).join(' ');
-      latencyChart.insertAdjacentHTML(
-        'beforeend',
-        `<polyline fill="none" stroke="#0f172a" stroke-width="2" points="${polyline}" />`
-      );
-
-      points.forEach((point) => {
-        const color = point.reachable ? '#059669' : '#dc2626';
+      bars.forEach((bar) => {
+        const color = bar.reachable ? '#059669' : '#dc2626';
         latencyChart.insertAdjacentHTML(
           'beforeend',
-          `<circle cx="${point.x}" cy="${point.y}" r="4" fill="${color}">
-             <title>${formatDate(point.checkedAt)} • ${point.reachable ? 'Online' : 'Offline'} • ${point.latency.toFixed(3)}ms</title>
-           </circle>`
+          `<rect x="${bar.x}" y="${bar.y}" width="${barWidth}" height="${Math.max(bar.barHeight, 4)}" rx="3" fill="${color}">
+             <title>${formatDate(bar.checkedAt)} • ${bar.reachable ? 'Online' : 'Offline'} • ${bar.latency.toFixed(3)}ms</title>
+           </rect>`
         );
       });
 
@@ -222,6 +234,47 @@
         'beforeend',
         `<text x="${padding}" y="${padding - 10}" fill="#475569" font-size="12">${maxLatency.toFixed(2)} ms</text>
          <text x="${width - padding}" y="${height - padding + 20}" text-anchor="end" fill="#475569" font-size="12">Checks recentes</text>`
+      );
+    }
+
+    function renderCheckTimeline(history) {
+      const width = 800;
+      const height = 120;
+      const paddingX = 20;
+      const paddingY = 16;
+      const barAreaHeight = height - paddingY * 2;
+      const plotted = history.slice().reverse();
+
+      checkTimelineChart.innerHTML = '';
+
+      if (!plotted.length) {
+        checkTimelineChart.insertAdjacentHTML(
+          'beforeend',
+          `<text x="${width / 2}" y="${height / 2}" text-anchor="middle" fill="#64748b" font-size="14">Sem checks para exibir</text>`
+        );
+        return;
+      }
+
+      const barWidth = 10;
+      const barGap = 3;
+
+      plotted.forEach((entry, index) => {
+        const x = paddingX + index * (barWidth + barGap);
+        const y = paddingY;
+        const color = entry.reachable ? '#10b981' : '#f43f5e';
+
+        checkTimelineChart.insertAdjacentHTML(
+          'beforeend',
+          `<rect x="${x}" y="${y}" width="${barWidth}" height="${barAreaHeight}" rx="2" fill="${color}">
+             <title>${formatDate(entry.checkedAt)} • ${entry.reachable ? 'Online' : 'Offline'}${entry.error ? ` • ${entry.error}` : ''}</title>
+           </rect>`
+        );
+      });
+
+      checkTimelineChart.insertAdjacentHTML(
+        'beforeend',
+        `<text x="${paddingX}" y="${height - 6}" fill="#334155" font-size="13" font-weight="600">Mais antigo</text>
+         <text x="${width - paddingX}" y="${height - 6}" text-anchor="end" fill="#334155" font-size="13" font-weight="600">Mais recente</text>`
       );
     }
 
@@ -236,6 +289,7 @@
       lastCheck.textContent = formatDate(statistics.lastCheckAt);
       renderHistory(history);
       renderChart(history);
+      renderCheckTimeline(history);
     }
 
     async function loadDetails() {
