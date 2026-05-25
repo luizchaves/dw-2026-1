@@ -1,0 +1,49 @@
+services:
+
+  postgres:
+    container_name: postgres
+    image: postgres:18.1
+    restart: always
+    shm_size: 128mb
+    environment:
+      # POSTGRES_USER: postgres # default
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - app-tier
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      # - ./data:/var/lib/postgresql
+
+  # adminer:
+  #   container_name: adminer
+  #   image: adminer:5.4.1
+  #   restart: always
+  #   networks:
+  #     - app-tier
+  #   ports:
+  #     - 8080:8080
+  #   depends_on:
+  #     - postgres
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:9.10
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    networks:
+      - app-tier
+    ports:
+      - 8080:80
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+
+networks:
+  app-tier:
+    driver: bridge
