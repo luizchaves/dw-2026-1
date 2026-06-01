@@ -1,7 +1,16 @@
 import { DatabaseSync } from 'node:sqlite';
-import getDatabaseFile from './dbFile.js';
+import { existsSync, rmSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const dbFile = getDatabaseFile();
+const DB_FILES_BY_ENV = {
+  test: resolve('src', 'database', 'db.test.sqlite'),
+  development: resolve('src', 'database', 'db.dev.sqlite'),
+  production: resolve('src', 'database', 'db.sqlite'),
+};
+
+const dbFile =
+  DB_FILES_BY_ENV[process.env.NODE_ENV] ?? DB_FILES_BY_ENV.development;
 
 function parseParams(params = []) {
   return Array.isArray(params) ? params : [params];
@@ -43,4 +52,18 @@ async function connect() {
   return createPromiseDatabase(new DatabaseSync(dbFile));
 }
 
-export default { connect };
+function dropDatabase() {
+  if (existsSync(dbFile)) {
+    rmSync(dbFile);
+    console.log(`Removed database file: ${dbFile}`);
+  } else {
+    console.log(`Database file not found: ${dbFile}`);
+  }
+}
+
+const __filename = fileURLToPath(import.meta.url);
+if (process.argv[1] === __filename && process.argv[2] === 'drop') {
+  dropDatabase();
+}
+
+export default { connect, dropDatabase, dbFile };

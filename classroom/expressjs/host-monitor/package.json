@@ -10,7 +10,7 @@
     "format:check": "prettier --check .",
     "db:reload": "npm run db:drop && npm run db:load",
     "db:load": "node src/database/load.js",
-    "db:drop": "node src/database/drop.js"
+    "db:drop": "node src/database/database.js drop"
   },
   "dependencies": {
     "cuid": "^3.0.0",
