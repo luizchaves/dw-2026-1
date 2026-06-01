@@ -109,7 +109,6 @@ async function updateHostAvailability(db, hostId, status) {
 }
 
 async function create({ name, address, category, id }) {
-  await Migration.up();
   const hostId = id ?? cuid();
 
   let parsedHost;
@@ -148,7 +147,6 @@ async function create({ name, address, category, id }) {
 }
 
 async function read(where) {
-  await Migration.up();
   const db = await database.connect();
 
   try {
@@ -203,7 +201,6 @@ async function readById(id) {
     throw new HostNotFoundError('Unable to find host');
   }
 
-  await Migration.up();
   const db = await database.connect();
   let host;
 
@@ -228,8 +225,6 @@ async function readById(id) {
 }
 
 async function update({ id, name, address, category }) {
-  await Migration.up();
-
   let parsedHost;
 
   try {
@@ -270,7 +265,6 @@ async function remove(id) {
     throw new HostNotFoundError('Unable to find host');
   }
 
-  await Migration.up();
   const db = await database.connect();
 
   try {
@@ -287,7 +281,6 @@ async function remove(id) {
 }
 
 async function addPingResult(hostId, pingResult) {
-  await Migration.up();
   const db = await database.connect();
   const checkedAt = new Date().toISOString();
 
@@ -337,7 +330,6 @@ async function addPingResult(hostId, pingResult) {
 }
 
 async function addPingError(hostId, errorMessage) {
-  await Migration.up();
   const db = await database.connect();
   const checkedAt = new Date().toISOString();
 
@@ -375,7 +367,6 @@ async function addPingError(hostId, errorMessage) {
 }
 
 async function readPingHistory(hostId, limit = 20) {
-  await Migration.up();
   const db = await database.connect();
 
   try {
@@ -425,7 +416,6 @@ async function readDetails(hostId, limit = 20) {
   const host = await readById(hostId);
   const history = await readPingHistory(hostId, limit);
 
-  await Migration.up();
   const db = await database.connect();
 
   try {

@@ -8,8 +8,6 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandlers.js';
 import swaggerSpec from './docs/swagger.js';
 import { pingAllHosts } from './jobs/pingHosts.js';
 
-const PING_JOB_INTERVAL_MS = 1 * 60 * 1000; // 1 minute
-
 const app = express();
 app.use(morgan('tiny'));
 
@@ -26,20 +24,17 @@ app.use('/api', hostRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const isMainModule =
-  process.argv[1] !== undefined &&
-  import.meta.url === pathToFileURL(process.argv[1]).href;
+app.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000');
+});
 
-if (isMainModule) {
-  app.listen(3000, () => {
-    console.log('Server is running on http://localhost:3000');
-  });
-
-  setInterval(() => {
+setInterval(
+  () => {
     pingAllHosts().catch((error) => {
       console.error('Ping job failed:', error);
     });
-  }, PING_JOB_INTERVAL_MS);
-}
+  },
+  1 * 60 * 1000
+); // Run every 1 minute
 
 export default app;

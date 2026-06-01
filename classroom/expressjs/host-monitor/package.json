@@ -4,7 +4,7 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "test": "npm run test:api && npm run test:front",
-    "test:api": "NODE_ENV=test node src/database/drop.js && NODE_ENV=test node --test test/api/*.test.js",
+    "test:api": "NODE_ENV=test npm run db:reload && NODE_ENV=test node --test test/api/*.test.js",
     "test:front": "vitest run test/frontend",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
