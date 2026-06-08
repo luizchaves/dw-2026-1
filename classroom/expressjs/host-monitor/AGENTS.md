@@ -32,6 +32,7 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 src/
   index.ts                    # app Express e bootstrap HTTP (porta 3000)
   routes/hosts.route.ts       # rotas da API de hosts
+  controllers/hosts.controller.ts # handlers HTTP da API de hosts
   models/Hosts.ts             # regras de negócio, histórico e estatísticas
   schemas/host.ts             # schemas de validação (zod)
   types.ts                    # contratos compartilhados da aplicação
