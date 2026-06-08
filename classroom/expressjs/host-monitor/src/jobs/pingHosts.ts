@@ -1,7 +1,7 @@
 import { ping } from '../lib/ping.js';
 import Host from '../models/Hosts.js';
 
-export async function pingAllHosts() {
+export async function pingAllHosts(): Promise<void> {
   const hosts = await Host.read();
 
   for (const host of hosts) {
@@ -10,7 +10,9 @@ export async function pingAllHosts() {
 
       await Host.addPingResult(host.id, result);
     } catch (error) {
-      await Host.addPingError(host.id, error.message);
+      const message = error instanceof Error ? error.message : 'Unknown host';
+
+      await Host.addPingError(host.id, message);
     }
   }
 }

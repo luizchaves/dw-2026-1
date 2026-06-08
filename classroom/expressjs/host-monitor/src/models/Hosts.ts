@@ -1,10 +1,59 @@
 import cuid from 'cuid';
+import type { DatabaseRow, PromiseDatabase } from '../database/database.js';
 import database from '../database/database.js';
-import Migration from '../database/migration.js';
 import { HostNotFoundError, InvalidHostError } from '../errors/HostError.js';
-import { hostCreateSchema, hostWithIdSchema } from '../schemas/host.js';
+import {
+  hostCreateSchema,
+  hostWithIdSchema,
+  type HostCreateInput,
+  type HostWithIdInput,
+} from '../schemas/host.js';
+import type {
+  HostAvailabilityStatistics,
+  HostDetails,
+  HostRecord,
+  HostStatus,
+  PingHistoryItem,
+  PingResult,
+  PingState,
+} from '../types.js';
 
-const ALLOWED_FILTER_FIELDS = new Set([
+type AllowedFilterField = 'id' | 'name' | 'address' | 'category' | 'status';
+type HostFilter = Partial<Record<AllowedFilterField, string | number>>;
+
+type HostRow = DatabaseRow & {
+  id: string;
+  name: string;
+  address: string;
+  category: string;
+  status: HostStatus | null;
+  uptime: number | null;
+  last_checked_at: string | null;
+};
+
+type PingAggregateRow = DatabaseRow & {
+  total_checks: number;
+  successful_checks: number;
+  average_latency: number | null;
+  min_latency: number | null;
+  max_latency: number | null;
+  last_check_at: string | null;
+};
+
+type PingHistoryRow = DatabaseRow & {
+  id: number;
+  checked_at: string;
+  reachable: number;
+  transmitted: number | null;
+  received: number | null;
+  min_ms: number | null;
+  avg_ms: number | null;
+  max_ms: number | null;
+  stddev_ms: number | null;
+  error: string | null;
+};
+
+const ALLOWED_FILTER_FIELDS = new Set<AllowedFilterField>([
   'id',
   'name',
   'address',
@@ -12,15 +61,17 @@ const ALLOWED_FILTER_FIELDS = new Set([
   'status',
 ]);
 
-function roundAvailability(value) {
+function roundAvailability(value: number): number {
   return Number(value.toFixed(2));
 }
 
-function mapHostRow(row) {
-  if (!row) {
-    return row;
-  }
+function roundNullable(value: number | null | undefined, digits: number) {
+  return value === null || value === undefined
+    ? null
+    : Number(Number(value).toFixed(digits));
+}
 
+function mapHostRow(row: HostRow): HostRecord {
   return {
     id: row.id,
     name: row.name,
@@ -32,7 +83,7 @@ function mapHostRow(row) {
   };
 }
 
-function createEmptyPingStatistics() {
+function createEmptyPingStatistics(): HostAvailabilityStatistics {
   return {
     totalChecks: 0,
     successfulChecks: 0,
@@ -45,8 +96,11 @@ function createEmptyPingStatistics() {
   };
 }
 
-async function getPingStatistics(db, hostId) {
-  const aggregates = await db.get(
+async function getPingStatistics(
+  db: PromiseDatabase,
+  hostId: string
+): Promise<HostAvailabilityStatistics> {
+  const aggregates = await db.get<PingAggregateRow>(
     `
       SELECT
         COUNT(*) AS total_checks,
@@ -77,23 +131,18 @@ async function getPingStatistics(db, hostId) {
     successfulChecks,
     failedChecks,
     availability,
-    averageLatency:
-      aggregates.average_latency === null
-        ? null
-        : Number(aggregates.average_latency.toFixed(3)),
-    minLatency:
-      aggregates.min_latency === null
-        ? null
-        : Number(aggregates.min_latency.toFixed(3)),
-    maxLatency:
-      aggregates.max_latency === null
-        ? null
-        : Number(aggregates.max_latency.toFixed(3)),
+    averageLatency: roundNullable(aggregates.average_latency, 3),
+    minLatency: roundNullable(aggregates.min_latency, 3),
+    maxLatency: roundNullable(aggregates.max_latency, 3),
     lastCheckAt: aggregates.last_check_at,
   };
 }
 
-async function updateHostAvailability(db, hostId, status) {
+async function updateHostAvailability(
+  db: PromiseDatabase,
+  hostId: string,
+  status: HostStatus
+): Promise<HostAvailabilityStatistics> {
   const stats = await getPingStatistics(db, hostId);
 
   await db.run(
@@ -108,10 +157,15 @@ async function updateHostAvailability(db, hostId, status) {
   return stats;
 }
 
-async function create({ name, address, category, id }) {
+async function create({
+  name,
+  address,
+  category,
+  id,
+}: HostCreateInput & { id?: string }): Promise<HostRecord> {
   const hostId = id ?? cuid();
 
-  let parsedHost;
+  let parsedHost: HostCreateInput;
 
   try {
     parsedHost = hostCreateSchema.parse({
@@ -146,20 +200,25 @@ async function create({ name, address, category, id }) {
   };
 }
 
-async function read(where) {
+async function read(where?: HostFilter): Promise<HostRecord[]> {
   const db = await database.connect();
 
   try {
     if (where) {
-      const field = Object.keys(where)[0];
-      const value = where[field];
+      const field = Object.keys(where)[0] as AllowedFilterField | undefined;
 
-      if (!ALLOWED_FILTER_FIELDS.has(field)) {
+      if (!field || !ALLOWED_FILTER_FIELDS.has(field)) {
         throw new InvalidHostError('Invalid filter field');
       }
 
+      const value = where[field];
+
+      if (value === undefined) {
+        throw new InvalidHostError('Invalid filter value');
+      }
+
       if (typeof value === 'string') {
-        const rows = await db.all(
+        const rows = await db.all<HostRow>(
           `
             SELECT id, name, address, category, status, uptime, last_checked_at
             FROM hosts
@@ -171,7 +230,7 @@ async function read(where) {
         return rows.map(mapHostRow);
       }
 
-      const rows = await db.all(
+      const rows = await db.all<HostRow>(
         `
           SELECT id, name, address, category, status, uptime, last_checked_at
           FROM hosts
@@ -183,7 +242,7 @@ async function read(where) {
       return rows.map(mapHostRow);
     }
 
-    const rows = await db.all(
+    const rows = await db.all<HostRow>(
       `
         SELECT id, name, address, category, status, uptime, last_checked_at
         FROM hosts
@@ -196,16 +255,16 @@ async function read(where) {
   }
 }
 
-async function readById(id) {
+async function readById(id: string | undefined): Promise<HostRecord> {
   if (!id) {
     throw new HostNotFoundError('Unable to find host');
   }
 
   const db = await database.connect();
-  let host;
+  let host: HostRow | undefined;
 
   try {
-    host = await db.get(
+    host = await db.get<HostRow>(
       `
         SELECT id, name, address, category, status, uptime, last_checked_at
         FROM hosts
@@ -224,8 +283,13 @@ async function readById(id) {
   return mapHostRow(host);
 }
 
-async function update({ id, name, address, category }) {
-  let parsedHost;
+async function update({
+  id,
+  name,
+  address,
+  category,
+}: HostWithIdInput): Promise<HostRecord> {
+  let parsedHost: HostWithIdInput;
 
   try {
     parsedHost = hostWithIdSchema.parse({
@@ -260,7 +324,7 @@ async function update({ id, name, address, category }) {
   return readById(parsedHost.id);
 }
 
-async function remove(id) {
+async function remove(id: string | undefined): Promise<boolean> {
   if (!id) {
     throw new HostNotFoundError('Unable to find host');
   }
@@ -280,7 +344,10 @@ async function remove(id) {
   return true;
 }
 
-async function addPingResult(hostId, pingResult) {
+async function addPingResult(
+  hostId: string,
+  pingResult: PingResult
+): Promise<PingState> {
   const db = await database.connect();
   const checkedAt = new Date().toISOString();
 
@@ -306,13 +373,13 @@ async function addPingResult(hostId, pingResult) {
         hostId,
         checkedAt,
         1,
-        pingResult.statistics?.transmitted ?? 0,
-        pingResult.statistics?.received ?? 0,
-        pingResult.statistics?.min ?? null,
-        pingResult.statistics?.avg ?? null,
-        pingResult.statistics?.max ?? null,
-        pingResult.statistics?.stddev ?? null,
-        pingResult.output ?? null,
+        pingResult.statistics.transmitted,
+        pingResult.statistics.received,
+        pingResult.statistics.min,
+        pingResult.statistics.avg,
+        pingResult.statistics.max,
+        pingResult.statistics.stddev,
+        pingResult.output,
         null,
       ]
     );
@@ -329,7 +396,10 @@ async function addPingResult(hostId, pingResult) {
   }
 }
 
-async function addPingError(hostId, errorMessage) {
+async function addPingError(
+  hostId: string,
+  errorMessage: string
+): Promise<PingState> {
   const db = await database.connect();
   const checkedAt = new Date().toISOString();
 
@@ -366,7 +436,10 @@ async function addPingError(hostId, errorMessage) {
   }
 }
 
-async function readPingHistory(hostId, limit = 20) {
+async function readPingHistory(
+  hostId: string,
+  limit: unknown = 20
+): Promise<PingHistoryItem[]> {
   const db = await database.connect();
 
   try {
@@ -374,7 +447,7 @@ async function readPingHistory(hostId, limit = 20) {
       ? 20
       : Math.min(Math.max(Number(limit), 1), 100);
 
-    const historyRows = await db.all(
+    const historyRows = await db.all<PingHistoryRow>(
       `
         SELECT
           id,
@@ -396,7 +469,7 @@ async function readPingHistory(hostId, limit = 20) {
     );
 
     return historyRows.map((row) => ({
-      id: row.id,
+      id: Number(row.id),
       checkedAt: row.checked_at,
       reachable: Boolean(row.reachable),
       transmitted: Number(row.transmitted ?? 0),
@@ -412,7 +485,10 @@ async function readPingHistory(hostId, limit = 20) {
   }
 }
 
-async function readDetails(hostId, limit = 20) {
+async function readDetails(
+  hostId: string,
+  limit: unknown = 20
+): Promise<HostDetails> {
   const host = await readById(hostId);
   const history = await readPingHistory(hostId, limit);
 

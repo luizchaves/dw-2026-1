@@ -1,13 +1,15 @@
 # AGENTS.md - host-monitor
 
-Aplicação de monitoramento de hosts construída com Express.js (JavaScript/ESM), SQLite e frontend estático.
+Aplicação de monitoramento de hosts construída com Express.js (TypeScript/ESM), SQLite e frontend estático.
 
 ## Comandos essenciais
 
 ```bash
 npm install               # instalar dependências
 npm run dev               # desenvolvimento com hot reload
-npm start                 # execução padrão
+npm run build             # compila TypeScript para dist
+npm start                 # execução padrão a partir de dist
+npm run typecheck         # valida tipos sem emitir arquivos
 npm test                  # roda testes de API + frontend
 npm run test:api          # testes de API com NODE_ENV=test
 npm run test:front        # testes de frontend (Vitest)
@@ -28,20 +30,19 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 ```text
 src/
-  index.js                    # app Express e bootstrap HTTP (porta 3000)
-  routes/hosts.js             # rotas da API de hosts
-  models/Hosts.js             # regras de negócio, histórico e estatísticas
-  schemas/host.js             # schemas de validação (zod)
+  index.ts                    # app Express e bootstrap HTTP (porta 3000)
+  routes/hosts.route.ts       # rotas da API de hosts
+  models/Hosts.ts             # regras de negócio, histórico e estatísticas
+  schemas/host.ts             # schemas de validação (zod)
+  types.ts                    # contratos compartilhados da aplicação
   middleware/                 # validações e tratamento de erro
   database/
-    database.js               # conexão SQLite
-    dbFile.js                 # seleção do arquivo por NODE_ENV
-    migration.js              # tabela hosts + tabela ping_checks
-    seeders.js                # carga de dados
-    drop.js                   # remoção do banco do ambiente atual
-  docs/swagger.js             # especificação OpenAPI
+    database.ts               # conexão SQLite e seleção do arquivo por NODE_ENV
+    migration.ts              # tabela hosts + tabela ping_checks
+    seeders.ts                # carga de dados
+  docs/swagger.ts             # especificação OpenAPI
 test/
-  api/hosts.routes.test.js    # testes de integração da API
+  api/hosts.routes.test.ts    # testes de integração da API
   frontend/index.vitest.test.js
   frontend/host.vitest.test.js
 public/
@@ -66,19 +67,20 @@ public/
 
 ## Convenções
 
-- ES Modules com type module no package.json.
+- ES Modules com type module no package.json e TypeScript com moduleResolution NodeNext.
 - HttpError e erros de domínio padronizam respostas 4xx/5xx.
 - app exportado como default para uso com supertest.
 - Porta padrão da aplicação: 3000.
 - Documentação em /api/docs.
 - Status de host: Unknown, Online, Offline.
 - Uptime representa disponibilidade percentual (0-100) baseada no histórico.
+- Imports relativos nos arquivos TypeScript usam extensão `.js`, compatível com a saída ESM em `dist`.
 
 ## Banco por ambiente
 
-- NODE_ENV=test -> src/database/db.test.sqlite
-- NODE_ENV=development -> src/database/db.dev.sqlite
-- NODE_ENV=production -> src/database/db.sqlite
+- NODE_ENV=test -> `src/database/db.test.sqlite` quando executado via `tsx`
+- NODE_ENV=development -> `src/database/db.dev.sqlite` quando executado via `tsx`
+- NODE_ENV=production -> `dist/database/db.sqlite` quando executado via build compilado
 
 Observação: o script de teste de API limpa o banco de teste antes da execução.
 

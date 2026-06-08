@@ -1,11 +1,24 @@
+import type { Request, RequestHandler } from 'express';
 import { z } from 'zod';
 
 import { HttpError } from '../errors/HttpError.js';
 
-const getFirstIssueMessage = (error, fallbackMessage) =>
-  error.issues[0]?.message ?? fallbackMessage;
+type RequestValidationSchemas = {
+  params?: z.ZodType;
+  query?: z.ZodType;
+  body?: z.ZodType;
+};
 
-const parseWithHttpError = (schema, input, fallbackMessage) => {
+const getFirstIssueMessage = (
+  error: z.ZodError,
+  fallbackMessage: string
+): string => error.issues[0]?.message ?? fallbackMessage;
+
+const parseWithHttpError = <T>(
+  schema: z.ZodType<T>,
+  input: unknown,
+  fallbackMessage: string
+): T => {
   const result = schema.safeParse(input);
 
   if (!result.success) {
@@ -16,15 +29,15 @@ const parseWithHttpError = (schema, input, fallbackMessage) => {
 };
 
 export const validateRequest =
-  ({ params, query, body } = {}) =>
-  (req, res, next) => {
+  ({ params, query, body }: RequestValidationSchemas = {}): RequestHandler =>
+  (req, _res, next) => {
     try {
       if (params) {
         req.params = parseWithHttpError(
           params,
           req.params,
           'Invalid path parameters'
-        );
+        ) as Request['params'];
       }
 
       if (query) {
@@ -32,7 +45,7 @@ export const validateRequest =
           query,
           req.query,
           'Invalid query parameters'
-        );
+        ) as Request['query'];
       }
 
       if (body) {

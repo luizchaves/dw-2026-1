@@ -1,16 +1,18 @@
 {
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
-    "test": "npm run test:api && npm run test:front",
-    "test:api": "NODE_ENV=test npm run db:reload && NODE_ENV=test node --test test/api/*.test.js",
+    "build": "tsc",
+    "typecheck": "tsc --project tsconfig.typecheck.json",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "npm run typecheck && npm run test:api && npm run test:front",
+    "test:api": "NODE_ENV=test npm run db:reload && NODE_ENV=test node --import tsx --test test/api/*.test.ts",
     "test:front": "vitest run test/frontend",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:reload": "npm run db:drop && npm run db:load",
-    "db:load": "node src/database/load.js",
-    "db:drop": "node src/database/database.js drop"
+    "db:load": "tsx src/database/load.ts",
+    "db:drop": "tsx src/database/database.ts drop"
   },
   "dependencies": {
     "cuid": "^3.0.0",
@@ -20,9 +22,16 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^22.19.20",
+    "@types/supertest": "^7.2.0",
+    "@types/swagger-ui-express": "^4.1.8",
     "jsdom": "^29.1.1",
     "prettier": "^3.6.2",
     "supertest": "^7.2.2",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.7"
   }
 }

@@ -7,9 +7,22 @@ import { validateRequest } from '../middleware/validation.js';
 import Host from '../models/Hosts.js';
 import { hostCreateSchema, hostUpdateSchema } from '../schemas/host.js';
 import { HostNotFoundError, InvalidHostError } from '../errors/HostError.js';
+import type { HostRecord } from '../types.js';
+
 const routes = express.Router();
 
-const mapHostError = (error) => {
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : 'Unknown host';
+
+const getRequiredParam = (value: string | string[] | undefined): string => {
+  if (Array.isArray(value)) {
+    return value[0] ?? '';
+  }
+
+  return value ?? '';
+};
+
+const mapHostError = (error: unknown): never => {
   if (error instanceof HostNotFoundError || error instanceof InvalidHostError) {
     throw new HttpError(error.message);
   }
@@ -29,7 +42,7 @@ routes.post(
         const result = await ping(newHost.address, 1);
         await Host.addPingResult(newHost.id, result);
       } catch (error) {
-        await Host.addPingError(newHost.id, error.message);
+        await Host.addPingError(newHost.id, getErrorMessage(error));
       }
 
       res.status(201).json(await Host.readById(newHost.id));
@@ -47,7 +60,7 @@ routes.get(
   '/hosts/:id',
   validateRequest({ params: z.object({ id: z.string() }) }),
   async (req, res) => {
-    const { id } = req.params;
+    const id = getRequiredParam(req.params.id);
 
     try {
       res.json(await Host.readById(id));
@@ -61,7 +74,7 @@ routes.get(
   '/hosts/:id/details',
   validateRequest({ params: z.object({ id: z.string() }) }),
   async (req, res) => {
-    const { id } = req.params;
+    const id = getRequiredParam(req.params.id);
     const { limit } = req.query;
 
     try {
@@ -78,7 +91,7 @@ routes.get(
   '/hosts/:id/history',
   validateRequest({ params: z.object({ id: z.string() }) }),
   async (req, res) => {
-    const { id } = req.params;
+    const id = getRequiredParam(req.params.id);
     const { limit } = req.query;
 
     try {
@@ -100,7 +113,7 @@ routes.put(
     params: z.object({ id: z.string() }),
   }),
   async (req, res) => {
-    const { id } = req.params;
+    const id = getRequiredParam(req.params.id);
 
     try {
       const updatedHost = await Host.update({ id, ...req.body });
@@ -116,7 +129,7 @@ routes.delete(
   '/hosts/:id',
   validateRequest({ params: z.object({ id: z.string() }) }),
   async (req, res) => {
-    const { id } = req.params;
+    const id = getRequiredParam(req.params.id);
 
     try {
       await Host.remove(id);
@@ -131,15 +144,10 @@ routes.get(
   '/hosts/:id/ping',
   validateRequest({ params: z.object({ id: z.string() }) }),
   async (req, res) => {
-    const { id } = req.params;
+    const id = getRequiredParam(req.params.id);
     const { count } = req.query;
 
-    let host;
-    try {
-      host = await Host.readById(id);
-    } catch (error) {
-      mapHostError(error);
-    }
+    const host: HostRecord = await Host.readById(id).catch(mapHostError);
 
     const parsedCount = count !== undefined ? Number(count) : 1;
 
@@ -163,7 +171,8 @@ routes.get(
         },
       });
     } catch (error) {
-      const pingState = await Host.addPingError(id, error.message);
+      const message = getErrorMessage(error);
+      const pingState = await Host.addPingError(id, message);
 
       res.status(200).json({
         host: host.address,
@@ -180,7 +189,7 @@ routes.get(
         },
         output: '',
         reachable: false,
-        error: error.message,
+        error: message,
         checkedAt: pingState.checkedAt,
         hostStatus: {
           status: 'Offline',

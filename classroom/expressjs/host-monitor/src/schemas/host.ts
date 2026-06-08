@@ -36,4 +36,9 @@ const hostWithIdSchema = hostUpdateSchema.extend({
   id: z.string(),
 });
 
+type HostCreateInput = z.infer<typeof hostCreateSchema>;
+type HostUpdateInput = z.infer<typeof hostUpdateSchema>;
+type HostWithIdInput = z.infer<typeof hostWithIdSchema>;
+
 export { hostCreateSchema, hostUpdateSchema, hostSchema, hostWithIdSchema };
+export type { HostCreateInput, HostUpdateInput, HostWithIdInput };

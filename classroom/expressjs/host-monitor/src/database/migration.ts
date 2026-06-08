@@ -1,7 +1,12 @@
+import type { DatabaseRow, PromiseDatabase } from './database.js';
 import database from './database.js';
 
-async function ensureHostsColumns(db) {
-  const columns = await db.all('PRAGMA table_info(hosts)');
+type TableInfoRow = {
+  name: string;
+} & DatabaseRow;
+
+async function ensureHostsColumns(db: PromiseDatabase): Promise<void> {
+  const columns = await db.all<TableInfoRow>('PRAGMA table_info(hosts)');
   const columnNames = new Set(columns.map((column) => column.name));
 
   if (!columnNames.has('status')) {
@@ -17,7 +22,7 @@ async function ensureHostsColumns(db) {
   }
 }
 
-async function up() {
+async function up(): Promise<void> {
   const db = await database.connect();
 
   try {

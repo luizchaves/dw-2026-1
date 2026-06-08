@@ -1,16 +1,10 @@
-# Hello API (Express)
+# Host Monitor API
 
-API de exemplo para praticar conceitos de HTTP com Express:
-
-- Rotas GET e POST
-- Path parameter (`:name`)
-- Query parameter (`?name=`)
-- Body em JSON
-- Tratamento de erro com status 400, 404 e 500
+API de monitoramento de hosts construída com Express, TypeScript, SQLite e frontend estático.
 
 ## Requisitos
 
-- Node.js 18+
+- Node.js 22+
 - npm
 
 ## Instalação
@@ -19,33 +13,13 @@ API de exemplo para praticar conceitos de HTTP com Express:
 npm install
 ```
 
-## Executar
+## Desenvolvimento
 
-Modo desenvolvimento (com watch):
+Executa o servidor TypeScript com watch:
 
 ```bash
 npm run dev
 ```
-
-Modo normal:
-
-```bash
-npm start
-```
-
-## Testes
-
-Executar a bateria de testes automatizados:
-
-```bash
-npm test
-```
-
-Os testes de API rodam em banco separado automaticamente (`NODE_ENV=test`):
-
-- test: `src/database/db.test.sqlite`
-- development: `src/database/db.dev.sqlite`
-- production: `src/database/db.sqlite`
 
 Servidor padrão:
 
@@ -54,6 +28,50 @@ Servidor padrão:
 Base da API:
 
 - `http://localhost:3000/api`
+
+## Build e Produção
+
+Compila `src/**/*.ts` para `dist/**/*.js`:
+
+```bash
+npm run build
+```
+
+Executa a versão compilada:
+
+```bash
+npm start
+```
+
+## Banco de Dados
+
+Recria o banco do ambiente atual:
+
+```bash
+npm run db:reload
+```
+
+Arquivos por ambiente:
+
+- test: `src/database/db.test.sqlite`
+- development: `src/database/db.dev.sqlite`
+- production local compilado: `dist/database/db.sqlite`
+
+## Testes
+
+Executa typecheck, testes de API e testes de frontend:
+
+```bash
+npm test
+```
+
+Também é possível rodar separadamente:
+
+```bash
+npm run typecheck
+npm run test:api
+npm run test:front
+```
 
 ## Swagger
 
@@ -67,123 +85,31 @@ Especificacao OpenAPI em JSON:
 
 ## Endpoints
 
-| Metodo | Rota                | Parametros        | Sucesso | Erro comum                                   |
-| ------ | ------------------- | ----------------- | ------- | -------------------------------------------- |
-| GET    | /api/               | -                 | 200     | -                                            |
-| GET    | /api/en             | -                 | 200     | -                                            |
-| GET    | /api/pt             | -                 | 200     | -                                            |
-| GET    | /api/hello/en/:name | path: name        | 200     | 404 se rota incompleta                       |
-| GET    | /api/hello/pt       | query: name       | 200     | 400 se name ausente                          |
-| POST   | /api/hello/es       | body: name (JSON) | 200     | 400 se Content-Type invalido ou name ausente |
+| Metodo | Rota                   | Descricao                                 |
+| ------ | ---------------------- | ----------------------------------------- |
+| POST   | /api/hosts             | Cria host e executa ping inicial          |
+| GET    | /api/hosts             | Lista hosts                               |
+| GET    | /api/hosts/:id         | Retorna host por id                       |
+| PUT    | /api/hosts/:id         | Atualiza host                             |
+| DELETE | /api/hosts/:id         | Remove host                               |
+| GET    | /api/hosts/:id/ping    | Executa ping no host e registra historico |
+| GET    | /api/hosts/:id/details | Retorna host, historico e estatisticas    |
+| GET    | /api/hosts/:id/history | Retorna historico de ping                 |
 
-### 1) GET /api/
+## Docker
 
-Resposta esperada (`200`):
+Producao:
 
-```json
-{ "message": "Hello API" }
+```bash
+docker compose up --build
 ```
 
-### 2) GET /api/en
+Desenvolvimento:
 
-Resposta esperada (`200`):
-
-```json
-{ "message": "Hello, World!" }
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-### 3) GET /api/pt
+## Testes Manuais
 
-Resposta esperada (`200`):
-
-```json
-{ "message": "Olá, Mundo!" }
-```
-
-### 4) GET /api/hello/en/:name
-
-Exemplo:
-
-```http
-GET /api/hello/en/John
-```
-
-Resposta esperada (`200`):
-
-```json
-{ "message": "Hello, John!" }
-```
-
-### 5) GET /api/hello/pt?name=John
-
-Exemplo:
-
-```http
-GET /api/hello/pt?name=John
-```
-
-Resposta esperada (`200`):
-
-```json
-{ "message": "Olá, John!" }
-```
-
-Falha sem query string `name` (`400`):
-
-```json
-{ "error": "Name query parameter is required" }
-```
-
-### 6) POST /api/hello/es
-
-Headers obrigatórios:
-
-```http
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{ "name": "John" }
-```
-
-Resposta esperada (`200`):
-
-```json
-{ "message": "¡Hola, John!" }
-```
-
-Falhas comuns (`400`):
-
-- `Content-Type` inválido:
-
-```json
-{ "error": "Content-Type must be application/json" }
-```
-
-- Campo `name` ausente no body:
-
-```json
-{ "error": "Name body parameter is required" }
-```
-
-## Tratamento de Erros
-
-O projeto usa uma classe `HttpError` para erros de cliente, com status padrão `400`.
-
-Fluxo:
-
-- Erros lançados com `new HttpError(...)` retornam o status definido (ex.: `400`) com JSON no formato `{ "error": "..." }`.
-- Rotas não encontradas em `/api/*` retornam `404` com `{ "error": "Not Found" }`.
-- Erros inesperados retornam `500` com `{ "error": "Internal Server Error" }`.
-
-## Testes Manuais com requests.http
-
-Use o arquivo `requests.http` para executar as requisições rapidamente no VS Code.
-
-Variável padrão:
-
-```http
-@server=http://localhost:3000
-```
+Use o arquivo `requests.http` para executar requisicoes rapidamente no VS Code.

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import request from 'supertest';
 
 import app from '../../src/index.js';
+import type { HostRecord } from '../../src/types.js';
 
 describe('/api/hosts', () => {
   test('POST /api/hosts with valid JSON returns 201', async () => {
@@ -117,7 +118,9 @@ describe('/api/hosts', () => {
 
     assert.equal(listResponse.status, 200);
     assert.equal(
-      listResponse.body.some((host) => host.id === createResponse.body.id),
+      listResponse.body.some(
+        (host: HostRecord) => host.id === createResponse.body.id
+      ),
       false
     );
   });
@@ -246,7 +249,7 @@ describe('/api/hosts/:id/ping', () => {
       .set('Content-Type', 'application/json')
       .send({
         name: 'Unreachable Host',
-        address: '192.0.2.1',
+        address: 'unreachable.invalid',
         category: 'Production',
       });
 
