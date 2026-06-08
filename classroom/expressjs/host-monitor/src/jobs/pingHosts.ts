@@ -1,5 +1,5 @@
-import { ping } from '../lib/ping.js';
-import Host from '../models/Hosts.js';
+import { ping } from '@/lib/ping.js';
+import Host from '@/models/Hosts.js';
 
 export async function pingAllHosts(): Promise<void> {
   const hosts = await Host.read();

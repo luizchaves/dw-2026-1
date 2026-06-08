@@ -1,7 +1,7 @@
 import type { Request, RequestHandler } from 'express';
 import { z } from 'zod';
 
-import { HttpError } from '../errors/HttpError.js';
+import { HttpError } from '@/errors/HttpError.js';
 
 type RequestValidationSchemas = {
   params?: z.ZodType;

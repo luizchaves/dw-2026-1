@@ -3,10 +3,10 @@ import express from 'express';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
 
-import hostRoutes from './routes/hosts.route.js';
-import { errorHandler, notFoundHandler } from './middleware/errorHandlers.js';
-import swaggerSpec from './docs/swagger.js';
-import { pingAllHosts } from './jobs/pingHosts.js';
+import swaggerSpec from '@/docs/swagger.js';
+import { pingAllHosts } from '@/jobs/pingHosts.js';
+import { errorHandler, notFoundHandler } from '@/middleware/errorHandlers.js';
+import hostRoutes from '@/routes/hosts.route.js';
 
 const port = 3000;
 const app = express();

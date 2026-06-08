@@ -1,6 +1,6 @@
 import type { ErrorRequestHandler, RequestHandler } from 'express';
 
-import { HttpError } from '../errors/HttpError.js';
+import { HttpError } from '@/errors/HttpError.js';
 
 export const notFoundHandler: RequestHandler = (_req, res) => {
   res.status(404).json({ error: 'Not Found' });

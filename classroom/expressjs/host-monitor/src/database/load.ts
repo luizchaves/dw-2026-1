@@ -1,5 +1,5 @@
-import Migration from './migration.js';
-import Seed from './seeders.js';
+import Migration from '@/database/migration.js';
+import Seed from '@/database/seeders.js';
 
 async function load(): Promise<void> {
   await Migration.up();

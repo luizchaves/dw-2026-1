@@ -74,7 +74,9 @@ public/
 - Documentação em /api/docs.
 - Status de host: Unknown, Online, Offline.
 - Uptime representa disponibilidade percentual (0-100) baseada no histórico.
-- Imports relativos nos arquivos TypeScript usam extensão `.js`, compatível com a saída ESM em `dist`.
+- Imports internos usam o alias `@/*` para apontar para `src/*`.
+- Imports TypeScript ainda usam extensão `.js`, compatível com a saída ESM em `dist`.
+- O build executa `tsc && tsc-alias` para reescrever `@/*` na saída compilada.
 
 ## Banco por ambiente
 

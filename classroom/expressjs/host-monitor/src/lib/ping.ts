@@ -1,7 +1,7 @@
 import util from 'node:util';
 import { exec } from 'node:child_process';
 
-import type { PingResult } from '../types.js';
+import type { PingResult } from '@/types.js';
 
 const execAsync = util.promisify(exec);
 

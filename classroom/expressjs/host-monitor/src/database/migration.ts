@@ -1,5 +1,5 @@
-import type { DatabaseRow, PromiseDatabase } from './database.js';
-import database from './database.js';
+import type { DatabaseRow, PromiseDatabase } from '@/database/database.js';
+import database from '@/database/database.js';
 
 type TableInfoRow = {
   name: string;

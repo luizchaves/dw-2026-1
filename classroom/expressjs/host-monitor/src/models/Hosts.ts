@@ -1,13 +1,13 @@
 import cuid from 'cuid';
-import type { DatabaseRow, PromiseDatabase } from '../database/database.js';
-import database from '../database/database.js';
-import { HostNotFoundError, InvalidHostError } from '../errors/HostError.js';
+import type { DatabaseRow, PromiseDatabase } from '@/database/database.js';
+import database from '@/database/database.js';
+import { HostNotFoundError, InvalidHostError } from '@/errors/HostError.js';
 import {
   hostCreateSchema,
   hostWithIdSchema,
   type HostCreateInput,
   type HostWithIdInput,
-} from '../schemas/host.js';
+} from '@/schemas/host.js';
 import type {
   HostAvailabilityStatistics,
   HostDetails,
@@ -16,7 +16,7 @@ import type {
   PingHistoryItem,
   PingResult,
   PingState,
-} from '../types.js';
+} from '@/types.js';
 
 type AllowedFilterField = 'id' | 'name' | 'address' | 'category' | 'status';
 type HostFilter = Partial<Record<AllowedFilterField, string | number>>;

@@ -2,8 +2,8 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 
-import app from '../../src/index.js';
-import type { HostRecord } from '../../src/types.js';
+import app from '@/index.js';
+import type { HostRecord } from '@/types.js';
 
 describe('/api/hosts', () => {
   test('POST /api/hosts with valid JSON returns 201', async () => {

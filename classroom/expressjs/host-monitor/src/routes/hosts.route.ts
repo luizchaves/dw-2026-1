@@ -1,13 +1,13 @@
 import express from 'express';
 import { z } from 'zod';
-import { HttpError } from '../errors/HttpError.js';
-import { ping } from '../lib/ping.js';
-import { requireJsonContentType } from '../middleware/requireJsonContentType.js';
-import { validateRequest } from '../middleware/validation.js';
-import Host from '../models/Hosts.js';
-import { hostCreateSchema, hostUpdateSchema } from '../schemas/host.js';
-import { HostNotFoundError, InvalidHostError } from '../errors/HostError.js';
-import type { HostRecord } from '../types.js';
+import { HostNotFoundError, InvalidHostError } from '@/errors/HostError.js';
+import { HttpError } from '@/errors/HttpError.js';
+import { ping } from '@/lib/ping.js';
+import { requireJsonContentType } from '@/middleware/requireJsonContentType.js';
+import { validateRequest } from '@/middleware/validation.js';
+import Host from '@/models/Hosts.js';
+import { hostCreateSchema, hostUpdateSchema } from '@/schemas/host.js';
+import type { HostRecord } from '@/types.js';
 
 const routes = express.Router();
 
