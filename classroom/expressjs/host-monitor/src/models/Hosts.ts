@@ -1,6 +1,11 @@
+import {
+  Prisma,
+  type Host as PrismaHost,
+  type PingCheck,
+} from '@/generated/prisma/client.js';
 import cuid from 'cuid';
-import type { DatabaseRow, PromiseDatabase } from '@/database/database.js';
-import database from '@/database/database.js';
+
+import { prisma } from '@/database/database.js';
 import { HostNotFoundError, InvalidHostError } from '@/errors/HostError.js';
 import {
   hostCreateSchema,
@@ -21,38 +26,6 @@ import type {
 type AllowedFilterField = 'id' | 'name' | 'address' | 'category' | 'status';
 type HostFilter = Partial<Record<AllowedFilterField, string | number>>;
 
-type HostRow = DatabaseRow & {
-  id: string;
-  name: string;
-  address: string;
-  category: string;
-  status: HostStatus | null;
-  uptime: number | null;
-  last_checked_at: string | null;
-};
-
-type PingAggregateRow = DatabaseRow & {
-  total_checks: number;
-  successful_checks: number;
-  average_latency: number | null;
-  min_latency: number | null;
-  max_latency: number | null;
-  last_check_at: string | null;
-};
-
-type PingHistoryRow = DatabaseRow & {
-  id: number;
-  checked_at: string;
-  reachable: number;
-  transmitted: number | null;
-  received: number | null;
-  min_ms: number | null;
-  avg_ms: number | null;
-  max_ms: number | null;
-  stddev_ms: number | null;
-  error: string | null;
-};
-
 const ALLOWED_FILTER_FIELDS = new Set<AllowedFilterField>([
   'id',
   'name',
@@ -71,16 +44,27 @@ function roundNullable(value: number | null | undefined, digits: number) {
     : Number(Number(value).toFixed(digits));
 }
 
-function mapHostRow(row: HostRow): HostRecord {
+function mapHostRow(row: PrismaHost): HostRecord {
   return {
     id: row.id,
     name: row.name,
     address: row.address,
-    category: row.category,
-    status: row.status ?? 'Unknown',
+    category: row.category ?? '',
+    status: (row.status ?? 'Unknown') as HostStatus,
     uptime: Number(row.uptime ?? 0),
-    lastCheckedAt: row.last_checked_at ?? null,
+    lastCheckedAt: row.lastCheckedAt ?? null,
   };
+}
+
+function mapPrismaNotFound(error: unknown): never {
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === 'P2025'
+  ) {
+    throw new HostNotFoundError('Host not found');
+  }
+
+  throw error;
 }
 
 function createEmptyPingStatistics(): HostAvailabilityStatistics {
@@ -97,30 +81,30 @@ function createEmptyPingStatistics(): HostAvailabilityStatistics {
 }
 
 async function getPingStatistics(
-  db: PromiseDatabase,
   hostId: string
 ): Promise<HostAvailabilityStatistics> {
-  const aggregates = await db.get<PingAggregateRow>(
-    `
-      SELECT
-        COUNT(*) AS total_checks,
-        COALESCE(SUM(reachable), 0) AS successful_checks,
-        AVG(avg_ms) AS average_latency,
-        MIN(min_ms) AS min_latency,
-        MAX(max_ms) AS max_latency,
-        MAX(checked_at) AS last_check_at
-      FROM ping_checks
-      WHERE host_id = ?
-    `,
-    [hostId]
+  const [totalChecks, successfulChecks, latency, lastCheck] = await Promise.all(
+    [
+      prisma.pingCheck.count({ where: { hostId } }),
+      prisma.pingCheck.count({ where: { hostId, reachable: true } }),
+      prisma.pingCheck.aggregate({
+        where: { hostId },
+        _avg: { avgMs: true },
+        _min: { minMs: true },
+        _max: { maxMs: true },
+      }),
+      prisma.pingCheck.findFirst({
+        where: { hostId },
+        orderBy: [{ checkedAt: 'desc' }, { id: 'desc' }],
+        select: { checkedAt: true },
+      }),
+    ]
   );
 
-  if (!aggregates || !aggregates.total_checks) {
+  if (!totalChecks) {
     return createEmptyPingStatistics();
   }
 
-  const totalChecks = Number(aggregates.total_checks);
-  const successfulChecks = Number(aggregates.successful_checks);
   const failedChecks = totalChecks - successfulChecks;
   const availability = roundAvailability(
     (successfulChecks / totalChecks) * 100
@@ -131,28 +115,27 @@ async function getPingStatistics(
     successfulChecks,
     failedChecks,
     availability,
-    averageLatency: roundNullable(aggregates.average_latency, 3),
-    minLatency: roundNullable(aggregates.min_latency, 3),
-    maxLatency: roundNullable(aggregates.max_latency, 3),
-    lastCheckAt: aggregates.last_check_at,
+    averageLatency: roundNullable(latency._avg.avgMs, 3),
+    minLatency: roundNullable(latency._min.minMs, 3),
+    maxLatency: roundNullable(latency._max.maxMs, 3),
+    lastCheckAt: lastCheck?.checkedAt ?? null,
   };
 }
 
 async function updateHostAvailability(
-  db: PromiseDatabase,
   hostId: string,
   status: HostStatus
 ): Promise<HostAvailabilityStatistics> {
-  const stats = await getPingStatistics(db, hostId);
+  const stats = await getPingStatistics(hostId);
 
-  await db.run(
-    `
-      UPDATE hosts
-      SET status = ?, uptime = ?, last_checked_at = ?
-      WHERE id = ?
-    `,
-    [status, stats.availability, stats.lastCheckAt, hostId]
-  );
+  await prisma.host.update({
+    where: { id: hostId },
+    data: {
+      status,
+      uptime: stats.availability,
+      lastCheckedAt: stats.lastCheckAt,
+    },
+  });
 
   return stats;
 }
@@ -177,82 +160,54 @@ async function create({
     throw new InvalidHostError('Error when passing parameters');
   }
 
-  const db = await database.connect();
+  const host = await prisma.host.create({
+    data: {
+      id: hostId,
+      name: parsedHost.name,
+      address: parsedHost.address,
+      category: parsedHost.category,
+      status: 'Unknown',
+      uptime: 0,
+      lastCheckedAt: null,
+    },
+  });
 
-  try {
-    await db.run(
-      `
-        INSERT INTO hosts (id, name, address, category, status, uptime, last_checked_at)
-        VALUES (?, ?, ?, ?, 'Unknown', 0, NULL)
-      `,
-      [hostId, parsedHost.name, parsedHost.address, parsedHost.category]
-    );
-  } finally {
-    await db.close();
-  }
-
-  return {
-    ...parsedHost,
-    id: hostId,
-    status: 'Unknown',
-    uptime: 0,
-    lastCheckedAt: null,
-  };
+  return mapHostRow(host);
 }
 
 async function read(where?: HostFilter): Promise<HostRecord[]> {
-  const db = await database.connect();
+  if (where) {
+    const field = Object.keys(where)[0] as AllowedFilterField | undefined;
 
-  try {
-    if (where) {
-      const field = Object.keys(where)[0] as AllowedFilterField | undefined;
-
-      if (!field || !ALLOWED_FILTER_FIELDS.has(field)) {
-        throw new InvalidHostError('Invalid filter field');
-      }
-
-      const value = where[field];
-
-      if (value === undefined) {
-        throw new InvalidHostError('Invalid filter value');
-      }
-
-      if (typeof value === 'string') {
-        const rows = await db.all<HostRow>(
-          `
-            SELECT id, name, address, category, status, uptime, last_checked_at
-            FROM hosts
-            WHERE LOWER(${field}) LIKE LOWER(?)
-          `,
-          [`%${value}%`]
-        );
-
-        return rows.map(mapHostRow);
-      }
-
-      const rows = await db.all<HostRow>(
-        `
-          SELECT id, name, address, category, status, uptime, last_checked_at
-          FROM hosts
-          WHERE ${field} = ?
-        `,
-        [value]
-      );
-
-      return rows.map(mapHostRow);
+    if (!field || !ALLOWED_FILTER_FIELDS.has(field)) {
+      throw new InvalidHostError('Invalid filter field');
     }
 
-    const rows = await db.all<HostRow>(
-      `
-        SELECT id, name, address, category, status, uptime, last_checked_at
-        FROM hosts
-      `
-    );
+    const value = where[field];
+
+    if (value === undefined) {
+      throw new InvalidHostError('Invalid filter value');
+    }
+
+    const rows = await prisma.host.findMany({
+      where:
+        typeof value === 'string'
+          ? ({
+              [field]: {
+                contains: value,
+              },
+            } as Prisma.HostWhereInput)
+          : ({
+              [field]: value,
+            } as Prisma.HostWhereInput),
+    });
 
     return rows.map(mapHostRow);
-  } finally {
-    await db.close();
   }
+
+  const rows = await prisma.host.findMany();
+
+  return rows.map(mapHostRow);
 }
 
 async function readById(id: string | undefined): Promise<HostRecord> {
@@ -260,21 +215,7 @@ async function readById(id: string | undefined): Promise<HostRecord> {
     throw new HostNotFoundError('Unable to find host');
   }
 
-  const db = await database.connect();
-  let host: HostRow | undefined;
-
-  try {
-    host = await db.get<HostRow>(
-      `
-        SELECT id, name, address, category, status, uptime, last_checked_at
-        FROM hosts
-        WHERE id = ?
-      `,
-      [id]
-    );
-  } finally {
-    await db.close();
-  }
+  const host = await prisma.host.findUnique({ where: { id } });
 
   if (!host) {
     throw new HostNotFoundError('Host not found');
@@ -302,26 +243,20 @@ async function update({
     throw new InvalidHostError('Error when passing parameters');
   }
 
-  const db = await database.connect();
-
   try {
-    const result = await db.run(
-      `
-        UPDATE hosts
-        SET name = ?, address = ?, category = ?
-        WHERE id = ?
-      `,
-      [parsedHost.name, parsedHost.address, parsedHost.category, parsedHost.id]
-    );
+    const host = await prisma.host.update({
+      where: { id: parsedHost.id },
+      data: {
+        name: parsedHost.name,
+        address: parsedHost.address,
+        category: parsedHost.category,
+      },
+    });
 
-    if (!result.changes) {
-      throw new HostNotFoundError('Host not found');
-    }
-  } finally {
-    await db.close();
+    return mapHostRow(host);
+  } catch (error) {
+    mapPrismaNotFound(error);
   }
-
-  return readById(parsedHost.id);
 }
 
 async function remove(id: string | undefined): Promise<boolean> {
@@ -329,16 +264,10 @@ async function remove(id: string | undefined): Promise<boolean> {
     throw new HostNotFoundError('Unable to find host');
   }
 
-  const db = await database.connect();
-
   try {
-    const result = await db.run('DELETE FROM hosts WHERE id = ?', [id]);
-
-    if (!result.changes) {
-      throw new HostNotFoundError('Host not found');
-    }
-  } finally {
-    await db.close();
+    await prisma.host.delete({ where: { id } });
+  } catch (error) {
+    mapPrismaNotFound(error);
   }
 
   return true;
@@ -348,141 +277,94 @@ async function addPingResult(
   hostId: string,
   pingResult: PingResult
 ): Promise<PingState> {
-  const db = await database.connect();
   const checkedAt = new Date().toISOString();
 
-  try {
-    await db.run(
-      `
-        INSERT INTO ping_checks (
-          host_id,
-          checked_at,
-          reachable,
-          transmitted,
-          received,
-          min_ms,
-          avg_ms,
-          max_ms,
-          stddev_ms,
-          output,
-          error
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `,
-      [
-        hostId,
-        checkedAt,
-        1,
-        pingResult.statistics.transmitted,
-        pingResult.statistics.received,
-        pingResult.statistics.min,
-        pingResult.statistics.avg,
-        pingResult.statistics.max,
-        pingResult.statistics.stddev,
-        pingResult.output,
-        null,
-      ]
-    );
-
-    const statistics = await updateHostAvailability(db, hostId, 'Online');
-
-    return {
+  await prisma.pingCheck.create({
+    data: {
+      hostId,
       checkedAt,
       reachable: true,
-      statistics,
-    };
-  } finally {
-    await db.close();
-  }
+      transmitted: pingResult.statistics.transmitted,
+      received: pingResult.statistics.received,
+      minMs: pingResult.statistics.min,
+      avgMs: pingResult.statistics.avg,
+      maxMs: pingResult.statistics.max,
+      stddevMs: pingResult.statistics.stddev,
+      output: pingResult.output,
+      error: null,
+    },
+  });
+
+  const statistics = await updateHostAvailability(hostId, 'Online');
+
+  return {
+    checkedAt,
+    reachable: true,
+    statistics,
+  };
 }
 
 async function addPingError(
   hostId: string,
   errorMessage: string
 ): Promise<PingState> {
-  const db = await database.connect();
   const checkedAt = new Date().toISOString();
 
-  try {
-    await db.run(
-      `
-        INSERT INTO ping_checks (
-          host_id,
-          checked_at,
-          reachable,
-          transmitted,
-          received,
-          min_ms,
-          avg_ms,
-          max_ms,
-          stddev_ms,
-          output,
-          error
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `,
-      [hostId, checkedAt, 0, 0, 0, null, null, null, null, null, errorMessage]
-    );
-
-    const statistics = await updateHostAvailability(db, hostId, 'Offline');
-
-    return {
+  await prisma.pingCheck.create({
+    data: {
+      hostId,
       checkedAt,
       reachable: false,
-      statistics,
-    };
-  } finally {
-    await db.close();
-  }
+      transmitted: 0,
+      received: 0,
+      minMs: null,
+      avgMs: null,
+      maxMs: null,
+      stddevMs: null,
+      output: null,
+      error: errorMessage,
+    },
+  });
+
+  const statistics = await updateHostAvailability(hostId, 'Offline');
+
+  return {
+    checkedAt,
+    reachable: false,
+    statistics,
+  };
+}
+
+function mapPingHistoryRow(row: PingCheck): PingHistoryItem {
+  return {
+    id: row.id,
+    checkedAt: row.checkedAt,
+    reachable: row.reachable,
+    transmitted: Number(row.transmitted ?? 0),
+    received: Number(row.received ?? 0),
+    minMs: row.minMs,
+    avgMs: row.avgMs,
+    maxMs: row.maxMs,
+    stddevMs: row.stddevMs,
+    error: row.error,
+  };
 }
 
 async function readPingHistory(
   hostId: string,
   limit: unknown = 20
 ): Promise<PingHistoryItem[]> {
-  const db = await database.connect();
+  const parsedLimit = Number.isNaN(Number(limit))
+    ? 20
+    : Math.min(Math.max(Number(limit), 1), 100);
 
-  try {
-    const parsedLimit = Number.isNaN(Number(limit))
-      ? 20
-      : Math.min(Math.max(Number(limit), 1), 100);
+  const historyRows = await prisma.pingCheck.findMany({
+    where: { hostId },
+    orderBy: [{ checkedAt: 'desc' }, { id: 'desc' }],
+    take: parsedLimit,
+  });
 
-    const historyRows = await db.all<PingHistoryRow>(
-      `
-        SELECT
-          id,
-          checked_at,
-          reachable,
-          transmitted,
-          received,
-          min_ms,
-          avg_ms,
-          max_ms,
-          stddev_ms,
-          error
-        FROM ping_checks
-        WHERE host_id = ?
-        ORDER BY checked_at DESC, id DESC
-        LIMIT ?
-      `,
-      [hostId, parsedLimit]
-    );
-
-    return historyRows.map((row) => ({
-      id: Number(row.id),
-      checkedAt: row.checked_at,
-      reachable: Boolean(row.reachable),
-      transmitted: Number(row.transmitted ?? 0),
-      received: Number(row.received ?? 0),
-      minMs: row.min_ms,
-      avgMs: row.avg_ms,
-      maxMs: row.max_ms,
-      stddevMs: row.stddev_ms,
-      error: row.error,
-    }));
-  } finally {
-    await db.close();
-  }
+  return historyRows.map(mapPingHistoryRow);
 }
 
 async function readDetails(
@@ -491,20 +373,13 @@ async function readDetails(
 ): Promise<HostDetails> {
   const host = await readById(hostId);
   const history = await readPingHistory(hostId, limit);
+  const statistics = await getPingStatistics(hostId);
 
-  const db = await database.connect();
-
-  try {
-    const statistics = await getPingStatistics(db, hostId);
-
-    return {
-      host,
-      statistics,
-      history,
-    };
-  } finally {
-    await db.close();
-  }
+  return {
+    host,
+    statistics,
+    history,
+  };
 }
 
 export default {

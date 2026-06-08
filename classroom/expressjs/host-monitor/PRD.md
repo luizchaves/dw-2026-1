@@ -236,7 +236,7 @@ Também há risco de decisões frágeis de monitoramento quando não existe hist
 
 - Node.js
 - npm
-- SQLite (módulo nativo `node:sqlite`)
+- Prisma Client com SQLite
 - Express, Zod, Supertest, Vitest
 - Docker e Docker Compose
 

@@ -1,6 +1,6 @@
 # Host Monitor API
 
-API de monitoramento de hosts construída com Express, TypeScript, SQLite e frontend estático.
+API de monitoramento de hosts construída com Express, TypeScript, Prisma, SQLite e frontend estático.
 
 ## Requisitos
 
@@ -31,7 +31,7 @@ Base da API:
 
 ## Build e Produção
 
-Compila `src/**/*.ts` para `dist/**/*.js`:
+Gera Prisma Client e compila `src/**/*.ts` para `dist/**/*.js`:
 
 ```bash
 npm run build
@@ -45,7 +45,7 @@ npm start
 
 ## Banco de Dados
 
-Recria o banco do ambiente atual:
+Recria o banco SQLite do ambiente atual usando Prisma Migrate e seed:
 
 ```bash
 npm run db:reload

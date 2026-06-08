@@ -1,6 +1,6 @@
 # AGENTS.md - host-monitor
 
-Aplicação de monitoramento de hosts construída com Express.js (TypeScript/ESM), SQLite e frontend estático.
+Aplicação de monitoramento de hosts construída com Express.js (TypeScript/ESM), Prisma, SQLite e frontend estático.
 
 ## Comandos essenciais
 
@@ -37,9 +37,12 @@ src/
   types.ts                    # contratos compartilhados da aplicação
   middleware/                 # validações e tratamento de erro
   database/
-    database.ts               # conexão SQLite e seleção do arquivo por NODE_ENV
-    migration.ts              # tabela hosts + tabela ping_checks
-    seeders.ts                # carga de dados
+    database.ts               # Prisma Client e seleção do arquivo SQLite por NODE_ENV
+prisma/
+  schema.prisma               # modelos Prisma Host e PingCheck
+  migrations/                 # migrations aplicadas por prisma migrate deploy
+  seed.ts                     # carga inicial chamada por prisma db seed
+  seed.json                   # dados da carga inicial
   docs/swagger.ts             # especificação OpenAPI
 test/
   api/hosts.routes.test.ts    # testes de integração da API
@@ -77,6 +80,7 @@ public/
 - Imports internos usam o alias `@/*` para apontar para `src/*`.
 - Imports TypeScript ainda usam extensão `.js`, compatível com a saída ESM em `dist`.
 - O build executa `tsc && tsc-alias` para reescrever `@/*` na saída compilada.
+- Acesso ao banco deve usar Prisma Client, não SQL direto com `node:sqlite`.
 
 ## Banco por ambiente
 

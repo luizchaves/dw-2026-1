@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Host {
+  id            String      @id
+  name          String
+  address       String
+  category      String?
+  status        String      @default("Unknown")
+  uptime        Float       @default(0)
+  lastCheckedAt String?     @map("last_checked_at")
+  pingChecks    PingCheck[]
+
+  @@map("hosts")
+}
+
+model PingCheck {
+  id          Int     @id @default(autoincrement())
+  hostId      String  @map("host_id")
+  checkedAt   String  @map("checked_at")
+  reachable   Boolean
+  transmitted Int?    @default(0)
+  received    Int?    @default(0)
+  minMs       Float?  @map("min_ms")
+  avgMs       Float?  @map("avg_ms")
+  maxMs       Float?  @map("max_ms")
+  stddevMs    Float?  @map("stddev_ms")
+  output      String?
+  error       String?
+  host        Host    @relation(fields: [hostId], references: [id], onDelete: Cascade)
+
+  @@index([hostId, checkedAt(sort: Desc)], map: "idx_ping_checks_host_checked_at")
+  @@map("ping_checks")
+}
