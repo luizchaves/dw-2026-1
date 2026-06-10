@@ -1,6 +1,6 @@
 # Host Monitor API
 
-API de monitoramento de hosts construída com Express, TypeScript, Prisma, SQLite e frontend estático.
+API de monitoramento de hosts construída com Express, TypeScript, Prisma, Postgres e frontend estático.
 
 ## Requisitos
 
@@ -59,17 +59,18 @@ npm start
 
 ## Banco de Dados
 
-Recria o banco SQLite do ambiente atual usando Prisma Migrate e seed:
+Recria o banco Postgres configurado em `DATABASE_URL` usando Prisma Migrate e seed:
 
 ```bash
 npm run db:reload
 ```
 
-Arquivos por ambiente:
+Configuracao:
 
-- test: `src/database/db.test.sqlite`
-- development: `src/database/db.dev.sqlite`
-- production local compilado: `dist/database/db.sqlite`
+- `.env`: concentra host/portas expostas, credenciais/nome do Postgres e `JWT_SECRET`.
+- `DATABASE_URL`: é montada em runtime a partir de `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_HOST` e `POSTGRES_PORT`; ainda pode ser definida manualmente como override.
+- Testes locais usam `localhost:${POSTGRES_PORT}`; o container da aplicacao usa o host Docker `postgres`.
+- `prisma/schema.prisma`: schema unico com provider `postgresql`.
 
 JWT:
 
@@ -119,17 +120,13 @@ Especificacao OpenAPI em JSON:
 
 ## Docker
 
-Producao:
+Desenvolvimento local:
 
 ```bash
 docker compose up --build
 ```
 
-Desenvolvimento:
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
-```
+Esse compose sobe a aplicacao em modo desenvolvimento com Postgres, hot reload via `Dockerfile.dev`, volume em `./src` e dados persistidos no volume `host_monitor_postgres_data`. Para build de produção da aplicação, use o `Dockerfile`.
 
 ## Testes Manuais
 

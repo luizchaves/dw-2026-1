@@ -1,6 +1,6 @@
 # AGENTS.md - host-monitor
 
-Aplicação de monitoramento de hosts construída com Express.js (TypeScript/ESM), Prisma, SQLite e frontend estático.
+Aplicação de monitoramento de hosts construída com Express.js (TypeScript/ESM), Prisma, Postgres e frontend estático.
 
 ## Comandos essenciais
 
@@ -19,11 +19,7 @@ npm run db:reload         # recria banco do ambiente atual
 ## Docker
 
 ```bash
-# Produção
-docker compose up --build
-
-# Desenvolvimento (com volume para src)
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+docker compose up --build # desenvolvimento local com Postgres
 ```
 
 ## Estrutura relevante
@@ -41,10 +37,10 @@ src/
   types.ts                    # contratos compartilhados da aplicação
   middleware/                 # validações e tratamento de erro
   database/
-    database.ts               # Prisma Client e seleção do arquivo SQLite por NODE_ENV
+    database.ts               # Prisma Client com adapter Postgres
 prisma/
-  schema.prisma               # modelos Prisma Host e PingCheck
-  migrations/                 # migrations aplicadas por prisma migrate deploy
+  schema.prisma               # schema Prisma Postgres
+  migrations/                 # migrations Postgres
   seed.ts                     # carga inicial chamada por prisma db seed
   seed.json                   # dados da carga inicial
   docs/swagger.ts             # especificação OpenAPI
@@ -96,15 +92,17 @@ public/
 - Imports internos usam o alias `@/*` para apontar para `src/*`.
 - Imports TypeScript ainda usam extensão `.js`, compatível com a saída ESM em `dist`.
 - O build executa `tsc && tsc-alias` para reescrever `@/*` na saída compilada.
-- Acesso ao banco deve usar Prisma Client, não SQL direto com `node:sqlite`.
+- Acesso ao banco deve usar Prisma Client, não SQL direto.
 
 ## Banco por ambiente
 
-- NODE_ENV=test -> `src/database/db.test.sqlite` quando executado via `tsx`
-- NODE_ENV=development -> `src/database/db.dev.sqlite` quando executado via `tsx`
-- NODE_ENV=production -> `dist/database/db.sqlite` quando executado via build compilado
+- Postgres é o único provider do Prisma (`provider = "postgresql"`).
+- `.env` concentra portas expostas, credenciais/nome do Postgres e segredo JWT.
+- `DATABASE_URL` é usada por padrão pela aplicação e pelo Prisma.
+- Quando `DATABASE_URL` não está definida, ela é montada a partir de `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_HOST` e `POSTGRES_PORT`.
+- O Compose monta `DATABASE_URL` usando o host Docker `postgres`; comandos locais usam `localhost:${POSTGRES_PORT}`.
 
-Observação: o script de teste de API limpa o banco de teste antes da execução.
+Observação: o script de teste de API limpa o banco configurado antes da execução.
 
 ## Workflow
 

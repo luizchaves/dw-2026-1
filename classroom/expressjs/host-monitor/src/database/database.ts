@@ -1,23 +1,27 @@
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
-import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import 'dotenv/config';
+
+import { PrismaPg } from '@prisma/adapter-pg';
 
 import { PrismaClient } from '@/generated/prisma/client.js';
 
-const databaseDirectory = fileURLToPath(new URL('.', import.meta.url));
+function buildPostgresUrl(host: string, port: string): string {
+  const database = process.env.POSTGRES_DB ?? 'host_monitor';
+  const user = process.env.POSTGRES_USER ?? 'host_monitor';
+  const password = process.env.POSTGRES_PASSWORD ?? 'host_monitor';
 
-const DB_FILES_BY_ENV: Record<string, string> = {
-  test: resolve(databaseDirectory, 'db.test.sqlite'),
-  development: resolve(databaseDirectory, 'db.dev.sqlite'),
-  production: resolve(databaseDirectory, 'db.sqlite'),
-};
+  return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${encodeURIComponent(database)}`;
+}
 
-const nodeEnv = process.env.NODE_ENV ?? 'development';
-const dbFile = DB_FILES_BY_ENV[nodeEnv] ?? DB_FILES_BY_ENV.development;
-const databaseUrl = `file:${dbFile}`;
-const adapter = new PrismaBetterSqlite3({ url: databaseUrl });
+const databaseUrl =
+  process.env.DATABASE_URL ??
+  buildPostgresUrl(
+    process.env.POSTGRES_HOST ?? 'localhost',
+    process.env.POSTGRES_PORT ?? '5432',
+  );
+
+const adapter = new PrismaPg(databaseUrl);
 
 const prisma = new PrismaClient({ adapter });
 
-export { databaseUrl, dbFile, prisma };
-export default { databaseUrl, dbFile, prisma };
+export { databaseUrl, prisma };
+export default { databaseUrl, prisma };

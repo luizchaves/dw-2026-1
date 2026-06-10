@@ -1,9 +1,6 @@
-FROM node:22-alpine
+FROM node:24-alpine
 
 WORKDIR /app
-
-ENV NODE_ENV=production
-ENV DATABASE_URL=file:./src/database/db.sqlite
 
 COPY package*.json ./
 COPY prisma/ ./prisma/
@@ -17,4 +14,4 @@ RUN npm run build && npm prune --omit=dev
 
 EXPOSE 3000
 
-CMD ["node", "dist/src/index.js"]
+CMD ["sh", "-c", "until npx prisma migrate deploy; do sleep 2; done && node dist/src/index.js"]

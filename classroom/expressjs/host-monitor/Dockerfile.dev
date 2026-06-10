@@ -1,7 +1,6 @@
-FROM node:22-alpine
+FROM node:24-alpine
 
 WORKDIR /app
-ENV DATABASE_URL=file:./src/database/db.dev.sqlite
 
 COPY package*.json ./
 COPY prisma/ ./prisma/
