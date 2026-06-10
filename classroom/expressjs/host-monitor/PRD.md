@@ -2,7 +2,7 @@
 
 ## 1. Visão Geral
 
-Host Monitor é uma aplicação web com API REST e frontend estático para cadastro de hosts, verificação de disponibilidade e visualização de histórico e estatísticas de ping.
+Host Monitor é uma aplicação web com API REST e frontend estático autenticado para cadastro de usuários, login, cadastro de hosts, verificação de disponibilidade e visualização de histórico e estatísticas de ping.
 
 O produto atende um contexto educacional para prática de:
 
@@ -11,6 +11,7 @@ O produto atende um contexto educacional para prática de:
 - validação de payload com Zod
 - testes automatizados de API e frontend
 - documentação OpenAPI/Swagger
+- autenticação com JWT e senha armazenada como hash
 
 ## 2. Problema
 
@@ -25,6 +26,7 @@ Também há risco de decisões frágeis de monitoramento quando não existe hist
 3. Expor histórico de verificações e estatísticas agregadas de disponibilidade.
 4. Oferecer página de detalhes com histórico tabular, gráfico de latência e ação manual de ping.
 5. Manter isolamento de banco por ambiente (`development`, `test`, `production`).
+6. Exigir cadastro/login antes de acessar dashboard e detalhes de hosts.
 
 ## 4. Escopo
 
@@ -34,21 +36,25 @@ Também há risco de decisões frágeis de monitoramento quando não existe hist
 - Ping por host com persistência de histórico.
 - Estatísticas de disponibilidade e latência agregadas por host.
 - Frontend com:
+  - landing page pública
+  - cadastro e login de usuário
   - listagem e cadastro de hosts
   - página de detalhes por host
   - histórico de ping
   - gráfico de latência/disponibilidade
   - ação manual de nova verificação
+- Scripts compartilhados de frontend para navbar, sessão e envio de formulários de autenticação.
+- Cadastro/login com JWT.
 - Documentação Swagger.
 - Testes automatizados de API e frontend.
 
 ### 4.2 Fora de escopo (nesta fase)
 
-- Autenticação/autorização.
 - Alertas automáticos (email/webhook/SMS).
 - Multi-tenant.
 - Banco externo (PostgreSQL/MySQL).
 - Histórico de longo prazo com retenção configurável.
+- Controle de autorização por host/usuário.
 
 ## 5. Personas
 
@@ -112,15 +118,37 @@ Também há risco de decisões frágeis de monitoramento quando não existe hist
   - `GET /api/docs`
   - `GET /api/docs.json`
 
-### RF-10 - Frontend de listagem
+### RF-10 - Cadastro de usuário
 
-- Página principal deve:
+- Método: `POST /api/auth/register`
+- Entrada: `name`, `email`, `password`, `passwordConfirmation` (JSON)
+- Saída: usuário sem senha/hash + token JWT.
+- Regra: senha deve ser armazenada somente como hash.
+
+### RF-11 - Login de usuário
+
+- Método: `POST /api/auth/login`
+- Entrada: `email`, `password` (JSON)
+- Saída: usuário sem senha/hash + token JWT.
+- Regra: credenciais inválidas retornam erro sem revelar qual campo falhou.
+
+### RF-12 - Frontend público e autenticação
+
+- Landing page pública em `/`.
+- Cadastro em `/register.html`.
+- Login em `/login.html`.
+- Usuário autenticado é redirecionado para `/dashboard.html`.
+- Dashboard e detalhes exigem token no `localStorage`.
+
+### RF-13 - Frontend de listagem
+
+- Dashboard deve:
   - listar hosts
   - abrir modal de criação
   - permitir remoção
   - navegar para detalhes por host.
 
-### RF-11 - Frontend de detalhes
+### RF-14 - Frontend de detalhes
 
 - Página de host deve:
   - mostrar dados principais (status, uptime, checks, último check)
@@ -150,6 +178,7 @@ Também há risco de decisões frágeis de monitoramento quando não existe hist
 ### RNF-05 - Manutenibilidade
 
 - Código modular por camadas (rotas, modelo, middleware, database, docs, tests).
+- Lógica compartilhada do frontend deve ficar em `public/js` quando usada por mais de uma página.
 
 ## 8. Regras de Negócio
 
@@ -158,18 +187,28 @@ Também há risco de decisões frágeis de monitoramento quando não existe hist
 3. Uptime é disponibilidade percentual (0 a 100), derivada do histórico de checks.
 4. Ping para host inexistente deve retornar erro de domínio.
 5. Falha de ping em host existente deve registrar check offline no histórico.
+6. Cadastro de usuário deve rejeitar confirmação de senha divergente.
+7. Email de usuário deve ser único.
+8. Respostas de autenticação não devem expor senha nem hash da senha.
 
 ## 9. Fluxos Principais
 
-### Fluxo A - Cadastro com disponibilidade inicial
+### Fluxo A - Cadastro/login de usuário
 
-1. Usuário cadastra host na página principal.
+1. Usuário acessa a landing page.
+2. Usuário cria conta em `/register.html` ou entra em `/login.html`.
+3. API retorna JWT e dados públicos do usuário.
+4. Frontend salva sessão e direciona para `/dashboard.html`.
+
+### Fluxo B - Cadastro de host com disponibilidade inicial
+
+1. Usuário autenticado cadastra host no dashboard.
 2. API cria host.
 3. API executa ping inicial automaticamente.
 4. API registra histórico inicial e atualiza status/uptime.
 5. Frontend exibe host já com estado atualizado.
 
-### Fluxo B - Verificação manual em detalhes
+### Fluxo C - Verificação manual em detalhes
 
 1. Usuário abre página de detalhes do host.
 2. Frontend carrega `/details` (host + histórico + estatísticas).
@@ -184,7 +223,9 @@ Também há risco de decisões frágeis de monitoramento quando não existe hist
 3. Página de detalhes exibe histórico e gráfico sem erro para host válido.
 4. Botão de verificação manual atualiza dados após execução.
 5. Listagem mantém link de detalhes e ação de remoção por card.
-6. `npm run test:api` e `npm run test:front` passam integralmente.
+6. Login e cadastro salvam sessão e redirecionam para dashboard.
+7. Dashboard e detalhes redirecionam para login quando não há token.
+8. `npm run test:api` e `npm run test:front` passam integralmente.
 
 ## 11. Riscos e Mitigações
 
@@ -226,7 +267,16 @@ Também há risco de decisões frágeis de monitoramento quando não existe hist
 - endpoints de details/history
 - página de detalhes com tabela e gráfico
 
-### Fase 4 - Evolução sugerida
+### Fase 4 - Autenticação e fluxo de frontend (concluída)
+
+- cadastro/login de usuário
+- emissão de JWT
+- senha armazenada com hash
+- landing page pública
+- dashboard e detalhes após login
+- scripts compartilhados em `public/js`
+
+### Fase 5 - Evolução sugerida
 
 - filtros avançados e ordenação na UI
 - retenção de histórico configurável

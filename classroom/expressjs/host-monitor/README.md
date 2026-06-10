@@ -37,6 +37,12 @@ Paginas:
 - `/dashboard.html`: dashboard de hosts apos login
 - `/host.html?id=<id>`: detalhes do host apos login
 
+Frontend estatico:
+
+- `public/js/navbar.js`: renderizacao compartilhada do navbar publico e autenticado.
+- `public/js/session.js`: sessao no `localStorage`, protecao de paginas autenticadas, logout e `fetchWithAuth`.
+- `public/js/auth-form.js`: envio compartilhado dos formularios de login e cadastro.
+
 ## Build e Produção
 
 Gera Prisma Client e compila `src/**/*.ts` para `dist/**/*.js`:
@@ -68,6 +74,7 @@ Arquivos por ambiente:
 JWT:
 
 - `JWT_SECRET`: segredo usado para assinar tokens de cadastro/login.
+- Senhas de usuario sao armazenadas apenas como hash em `password_hash`.
 
 ## Testes
 
