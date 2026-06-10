@@ -1,5 +1,6 @@
 services:
   host-monitor:
+    container_name: host-monitor-prod
     build:
       context: .
       dockerfile: Dockerfile
@@ -20,6 +21,7 @@ services:
         condition: service_healthy
 
   postgres:
+    container_name: postgres-prod
     image: postgres:18-alpine
     restart: unless-stopped
     environment:
