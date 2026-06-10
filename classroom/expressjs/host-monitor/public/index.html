@@ -1,320 +1,147 @@
 <!doctype html>
 <html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Host Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hosts</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
+  <body class="min-h-screen bg-slate-950 text-white">
+    <main class="min-h-screen">
+      <div id="app-navbar"></div>
 
-<body class="bg-slate-100 text-slate-900 min-h-screen">
-  <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-    <nav
-      class="sticky top-0 z-40 mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/90 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
-      <a href="/" class="text-sm font-bold tracking-[0.18em] text-slate-900">HOST MONITOR</a>
-      <div class="flex items-center gap-2 text-sm">
-        <a href="/" class="rounded-lg bg-slate-900 px-3 py-2 font-semibold text-white">Hosts</a>
-        <a href="/api/docs"
-          class="rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">API
-          Docs</a>
-      </div>
-    </nav>
-
-    <header class="mb-10 text-center">
-      <p class="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
-        Painel de Hosts
-      </p>
-      <h1 class="mt-4 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-        Hosts disponíveis
-      </h1>
-      <p class="mt-3 text-base text-slate-600 sm:text-lg">
-        Visualize informações básicas dos hosts.
-      </p>
-    </header>
-
-    <section class="mb-10 flex justify-center">
-      <button id="open-host-modal" type="button"
-        class="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400">
-        Adicionar novo host
-      </button>
-    </section>
-
-    <div id="host-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 p-4" role="dialog"
-      aria-modal="true" aria-labelledby="host-modal-title">
-      <div class="w-full max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-lg sm:p-8">
-        <div class="mb-6 flex items-start justify-between gap-4">
-          <div>
-            <h2 id="host-modal-title" class="text-2xl font-semibold text-slate-900">
-              Adicionar novo host
-            </h2>
-            <p class="mt-2 text-sm text-slate-500">
-              Preencha os dados para cadastrar um host no painel.
-            </p>
+      <section
+        class="mx-auto grid min-h-[calc(100vh-84px)] max-w-7xl items-center gap-10 px-4 pb-12 pt-6 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8"
+      >
+        <div>
+          <p
+            class="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-300"
+          >
+            Monitoramento de hosts
+          </p>
+          <h1
+            class="mt-5 max-w-3xl text-5xl font-bold tracking-tight sm:text-6xl"
+          >
+            Host Monitor
+          </h1>
+          <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+            Acompanhe disponibilidade, latência e histórico dos seus hosts em um
+            painel direto para operação.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a
+              href="/login.html"
+              class="rounded-xl bg-cyan-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-200"
+              >Entrar</a
+            >
+            <a
+              href="/register.html"
+              class="rounded-xl border border-white/20 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+              >Criar conta</a
+            >
           </div>
-          <button id="close-host-modal" type="button"
-            class="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-300">
-            Fechar
-          </button>
         </div>
 
-        <form id="host-form" class="flex flex-col gap-6">
-          <label class="block">
-            <span class="text-sm font-medium text-slate-700">Nome do host</span>
-            <input type="text" name="name" placeholder="Google DNS"
-              class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-              required />
-          </label>
-
-          <label class="block">
-            <span class="text-sm font-medium text-slate-700">Endereço (IP ou domínio)</span>
-            <input type="text" name="address" placeholder="8.8.8.8"
-              class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-              required />
-          </label>
-
-          <label class="block">
-            <span class="text-sm font-medium text-slate-700">Categoria</span>
-            <input type="text" name="category" placeholder="DNS"
-              class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-              required />
-          </label>
-
-          <div>
-            <button type="submit"
-              class="inline-flex w-full justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400">
-              Adicionar host
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></section>
-  </main>
-  <script type="module">
-    async function fetchHosts() {
-      try {
-        const response = await fetch('/api/hosts');
-        if (!response.ok) {
-          throw new Error('Erro ao buscar hosts');
-        }
-        return await response.json();
-      } catch (error) {
-        console.error('Erro:', error);
-        return [];
-      }
-    }
-
-    const hosts = await fetchHosts();
-
-    const relativeTime = new Intl.RelativeTimeFormat('pt-BR', {
-      numeric: 'auto',
-    });
-
-    function formatUptime(uptime) {
-      const createdAt = new Date(uptime);
-
-      if (Number.isNaN(createdAt.getTime())) {
-        return uptime;
-      }
-
-      const elapsedSeconds = Math.floor((createdAt.getTime() - Date.now()) / 1000);
-      const divisions = [
-        { amount: 60, unit: 'minute' },
-        { amount: 24, unit: 'hour' },
-        { amount: 30, unit: 'day' },
-        { amount: 12, unit: 'month' },
-        { amount: Infinity, unit: 'year' },
-      ];
-
-      let duration = elapsedSeconds;
-
-      if (Math.abs(duration) < 60) {
-        return 'menos de 1 minuto';
-      }
-
-      duration /= 60;
-
-      for (const division of divisions) {
-        if (Math.abs(duration) < division.amount) {
-          return relativeTime.format(Math.trunc(duration), division.unit);
-        }
-
-        duration /= division.amount;
-      }
-
-      return uptime;
-    }
-
-    function createHostCard(host) {
-      let statusClass = '';
-      switch (host.status) {
-        case 'Unknown':
-          statusClass = 'bg-indigo-100 text-indigo-700 border-indigo-200';
-          break;
-        case 'Online':
-          statusClass = 'bg-emerald-100 text-emerald-700 border-emerald-200';
-          break;
-        case 'Manutenção':
-          statusClass = 'bg-amber-100 text-amber-700 border-amber-200';
-          break;
-        case 'Offline':
-          statusClass = 'bg-rose-100 text-rose-700 border-rose-200';
-          break;
-        default:
-          statusClass = 'bg-slate-100 text-slate-700 border-slate-200';
-      }
-
-      const availability = typeof host.uptime === 'number'
-        ? Math.max(0, Math.min(100, host.uptime))
-        : 0;
-
-      const availabilityLabel = typeof host.uptime === 'number'
-        ? `${host.uptime.toFixed(2)}%`
-        : formatUptime(host.uptime);
-
-      let availabilityBarClass = 'bg-slate-300';
-
-      if (availability >= 95) {
-        availabilityBarClass = 'bg-emerald-500';
-      } else if (availability >= 80) {
-        availabilityBarClass = 'bg-amber-500';
-      } else if (availability > 0) {
-        availabilityBarClass = 'bg-rose-500';
-      }
-
-      return `<div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md" data-id="${host.id}">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <h2 class="text-xl font-bold tracking-tight text-slate-900">${host.name}</h2>
-            <p class="mt-1 text-sm text-slate-500">Categoria: ${host.category}</p>
-          </div>
-          <span class="rounded-full border px-3 py-1 text-xs font-semibold ${statusClass}">${host.status}</span>
-        </div>
-
-        <dl class="mt-5 grid gap-3 text-sm text-slate-700">
-          <div class="rounded-2xl bg-slate-50 px-4 py-3">
-            <dt class="text-xs uppercase tracking-[0.12em] text-slate-500">Endereço</dt>
-            <dd class="mt-1 font-semibold text-slate-900 break-all">${host.address}</dd>
-          </div>
-          <div class="rounded-2xl bg-slate-50 px-4 py-3">
-            <div class="flex items-center justify-between">
-              <dt class="text-xs uppercase tracking-[0.12em] text-slate-500">Uptime</dt>
-              <dd class="font-bold text-slate-900">${availabilityLabel}</dd>
+        <div
+          class="overflow-hidden rounded-2xl border border-white/10 bg-slate-900 shadow-2xl shadow-cyan-950/40"
+        >
+          <div
+            class="flex items-center justify-between border-b border-white/10 px-4 py-3"
+          >
+            <div class="flex gap-2">
+              <span class="h-3 w-3 rounded-full bg-rose-400"></span>
+              <span class="h-3 w-3 rounded-full bg-amber-300"></span>
+              <span class="h-3 w-3 rounded-full bg-emerald-400"></span>
             </div>
-            <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
-              <div class="h-full rounded-full ${availabilityBarClass}" style="width: ${availability}%;"></div>
+            <span class="text-xs font-semibold text-slate-400"
+              >dashboard.html</span
+            >
+          </div>
+          <div class="grid gap-4 p-5 sm:grid-cols-3">
+            <article
+              class="rounded-xl border border-emerald-400/30 bg-emerald-400/10 p-4"
+            >
+              <p
+                class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200"
+              >
+                Online
+              </p>
+              <p class="mt-3 text-3xl font-bold">98.5%</p>
+              <div class="mt-4 h-2 rounded-full bg-white/10">
+                <div class="h-2 w-[98%] rounded-full bg-emerald-400"></div>
+              </div>
+            </article>
+            <article
+              class="rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-4"
+            >
+              <p
+                class="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200"
+              >
+                Latência
+              </p>
+              <p class="mt-3 text-3xl font-bold">12ms</p>
+              <div class="mt-4 flex h-10 items-end gap-1">
+                <span class="h-4 flex-1 rounded bg-cyan-300"></span>
+                <span class="h-7 flex-1 rounded bg-cyan-300"></span>
+                <span class="h-5 flex-1 rounded bg-cyan-300"></span>
+                <span class="h-9 flex-1 rounded bg-cyan-300"></span>
+                <span class="h-6 flex-1 rounded bg-cyan-300"></span>
+              </div>
+            </article>
+            <article
+              class="rounded-xl border border-rose-400/30 bg-rose-400/10 p-4"
+            >
+              <p
+                class="text-xs font-semibold uppercase tracking-[0.18em] text-rose-200"
+              >
+                Alertas
+              </p>
+              <p class="mt-3 text-3xl font-bold">1</p>
+              <div class="mt-4 h-2 rounded-full bg-white/10">
+                <div class="h-2 w-[20%] rounded-full bg-rose-400"></div>
+              </div>
+            </article>
+          </div>
+          <div class="border-t border-white/10 p-5">
+            <div class="grid gap-3">
+              <div
+                class="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3"
+              >
+                <div>
+                  <p class="font-semibold">Google DNS</p>
+                  <p class="text-sm text-slate-400">8.8.8.8</p>
+                </div>
+                <span
+                  class="rounded-full bg-emerald-400/20 px-3 py-1 text-xs font-bold text-emerald-200"
+                  >Online</span
+                >
+              </div>
+              <div
+                class="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3"
+              >
+                <div>
+                  <p class="font-semibold">Servidor interno</p>
+                  <p class="text-sm text-slate-400">intranet.local</p>
+                </div>
+                <span
+                  class="rounded-full bg-rose-400/20 px-3 py-1 text-xs font-bold text-rose-200"
+                  >Offline</span
+                >
+              </div>
             </div>
           </div>
-        </dl>
-
-        <div class="mt-5 flex items-center justify-between gap-3">
-          <span class="text-xs text-slate-500">ID: ${host.id.slice(0, 10)}...</span>
-          <div class="flex items-center gap-2">
-            <a href="/host.html?id=${host.id}" class="inline-flex items-center rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400">Ver detalhes</a>
-            <button type="button" aria-label="Excluir host" class="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-200 delete-host-btn" tabindex="0">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" />
-                <line x1="10" y1="11" x2="10" y2="17" />
-                <line x1="14" y1="11" x2="14" y2="17" />
-              </svg>
-              Remover
-            </button>
-          </div>
         </div>
-      </div>`;
-    }
+      </section>
+    </main>
 
-    const hostsContainer = document.querySelector('section.grid');
+    <script src="/js/navbar.js"></script>
+    <script type="module">
+      HostMonitorNavbar.renderNavbar({ theme: 'dark' });
 
-    hostsContainer.addEventListener('click', async function (event) {
-      const deleteButton = event.target.closest('.delete-host-btn');
-      if (!deleteButton) {
-        return;
+      if (localStorage.getItem('hostMonitorToken')) {
+        window.location.href = '/dashboard.html';
       }
-
-      const card = deleteButton.closest('[data-id]');
-      const hostId = card.getAttribute('data-id');
-
-      const response = await fetch(`/api/hosts/${hostId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        console.error('Erro ao excluir host');
-      }
-
-      const hostIndex = hosts.findIndex((host) => host.id === hostId);
-
-      if (hostIndex !== -1 && response.ok) {
-        hosts.splice(hostIndex, 1);
-        renderHosts();
-      }
-    });
-
-    function renderHosts() {
-      hostsContainer.innerHTML = '';
-      hosts.forEach((host) => {
-        hostsContainer.insertAdjacentHTML('afterbegin', createHostCard(host));
-      });
-    }
-
-    renderHosts();
-
-    const hostModal = document.getElementById('host-modal');
-    const openHostModalButton = document.getElementById('open-host-modal');
-    const closeHostModalButton = document.getElementById('close-host-modal');
-    const form = document.getElementById('host-form');
-
-    function openHostModal() {
-      hostModal.classList.remove('hidden');
-      hostModal.classList.add('flex');
-    }
-
-    function closeHostModal() {
-      hostModal.classList.add('hidden');
-      hostModal.classList.remove('flex');
-    }
-
-    openHostModalButton.addEventListener('click', openHostModal);
-    closeHostModalButton.addEventListener('click', closeHostModal);
-
-    hostModal.addEventListener('click', (event) => {
-      if (event.target === hostModal) {
-        closeHostModal();
-      }
-    });
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !hostModal.classList.contains('hidden')) {
-        closeHostModal();
-      }
-    });
-
-    form.onsubmit = async (event) => {
-      event.preventDefault();
-      const formDatam = new FormData(form);
-      const newHost = Object.fromEntries(formDatam.entries());
-
-      const response = await fetch('/api/hosts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newHost),
-      });
-
-      if (!response.ok) {
-        console.error('Erro ao adicionar host');
-        return;
-      }
-
-      const createdHost = await response.json();
-      hosts.push(createdHost);
-      renderHosts();
-      form.reset();
-      closeHostModal();
-    };
-  </script>
-</body>
-
+    </script>
+  </body>
 </html>

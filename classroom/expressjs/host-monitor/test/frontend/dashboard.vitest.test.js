@@ -7,7 +7,8 @@ import { JSDOM } from 'jsdom';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const htmlPath = resolve(__dirname, '../../public/index.html');
+const htmlPath = resolve(__dirname, '../../public/dashboard.html');
+const navbarPath = resolve(__dirname, '../../public/js/navbar.js');
 
 function createJsonResponse(body, ok = true, status = 200) {
   return {
@@ -62,6 +63,7 @@ function extractModuleScript(html) {
 
 async function bootstrapPage(initialHosts = []) {
   const html = readFileSync(htmlPath, 'utf8');
+  const navbarScript = readFileSync(navbarPath, 'utf8');
   const scriptContent = extractModuleScript(html);
   const dom = new JSDOM(html, {
     url: 'http://localhost:3000',
@@ -70,7 +72,17 @@ async function bootstrapPage(initialHosts = []) {
 
   const fetchMock = createFetchMock(initialHosts);
   dom.window.fetch = fetchMock;
+  dom.window.localStorage.setItem('hostMonitorToken', 'fake-token');
+  dom.window.localStorage.setItem(
+    'hostMonitorUser',
+    JSON.stringify({
+      id: 'u-1',
+      name: 'Maria Silva',
+      email: 'maria@example.com',
+    })
+  );
 
+  dom.window.eval(navbarScript);
   await dom.window.eval(`(async () => {${scriptContent}})()`);
 
   return { dom, fetchMock };
@@ -80,7 +92,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('public/index.html', () => {
+describe('public/dashboard.html', () => {
   test('renderiza hosts carregados da API', async () => {
     const { dom } = await bootstrapPage([
       {
@@ -200,6 +212,26 @@ describe('public/index.html', () => {
     const createdCard = dom.window.document.querySelector('[data-id="host-1"]');
     assert.ok(createdCard, 'Expected created host card to be rendered');
     assert.match(createdCard.textContent, /Cloudflare DNS/);
+
+    dom.window.close();
+  });
+
+  test('redireciona para login quando nao existe token', async () => {
+    const html = readFileSync(htmlPath, 'utf8');
+    const navbarScript = readFileSync(navbarPath, 'utf8');
+    const scriptContent = extractModuleScript(html);
+    const dom = new JSDOM(html, {
+      url: 'http://localhost:3000/dashboard.html',
+      runScripts: 'outside-only',
+    });
+
+    dom.window.fetch = createFetchMock();
+    dom.window.eval(navbarScript);
+
+    await assert.rejects(
+      () => dom.window.eval(`(async () => {${scriptContent}})()`),
+      /Missing auth token/
+    );
 
     dom.window.close();
   });

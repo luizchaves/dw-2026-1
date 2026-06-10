@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro | Host Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body class="min-h-screen bg-slate-100 text-slate-900">
+    <div id="app-navbar"></div>
+
+    <main
+      class="mx-auto grid min-h-[calc(100vh-84px)] max-w-6xl items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:px-8"
+    >
+      <section>
+        <h1
+          class="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl"
+        >
+          Cadastro
+        </h1>
+        <p class="mt-4 max-w-md text-base leading-7 text-slate-600">
+          Crie sua conta para acessar o dashboard de monitoramento e gerenciar
+          hosts.
+        </p>
+      </section>
+
+      <section
+        class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+      >
+        <form id="register-form" class="grid gap-5">
+          <label class="block">
+            <span class="text-sm font-semibold text-slate-700">Nome</span>
+            <input
+              type="text"
+              name="name"
+              autocomplete="name"
+              required
+              class="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            />
+          </label>
+
+          <label class="block">
+            <span class="text-sm font-semibold text-slate-700">Email</span>
+            <input
+              type="email"
+              name="email"
+              autocomplete="email"
+              required
+              class="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            />
+          </label>
+
+          <label class="block">
+            <span class="text-sm font-semibold text-slate-700">Senha</span>
+            <input
+              type="password"
+              name="password"
+              autocomplete="new-password"
+              minlength="6"
+              required
+              class="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            />
+          </label>
+
+          <label class="block">
+            <span class="text-sm font-semibold text-slate-700"
+              >Confirmação de senha</span
+            >
+            <input
+              type="password"
+              name="passwordConfirmation"
+              autocomplete="new-password"
+              minlength="6"
+              required
+              class="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            />
+          </label>
+
+          <p
+            id="register-feedback"
+            class="min-h-5 text-sm font-semibold text-rose-700"
+          ></p>
+
+          <button
+            id="register-submit"
+            type="submit"
+            class="rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400"
+          >
+            Criar conta
+          </button>
+        </form>
+
+        <p class="mt-5 text-sm text-slate-600">
+          Já tem conta?
+          <a
+            href="/login.html"
+            class="font-bold text-slate-900 underline decoration-slate-300 underline-offset-4"
+            >Entrar</a
+          >
+        </p>
+      </section>
+    </main>
+
+    <script src="/js/navbar.js"></script>
+    <script type="module">
+      HostMonitorNavbar.renderNavbar({ active: 'register' });
+
+      if (localStorage.getItem('hostMonitorToken')) {
+        window.location.href = '/dashboard.html';
+      }
+
+      const form = document.getElementById('register-form');
+      const feedback = document.getElementById('register-feedback');
+      const submitButton = document.getElementById('register-submit');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        submitButton.disabled = true;
+        submitButton.classList.add('opacity-60', 'cursor-not-allowed');
+
+        const payload = Object.fromEntries(new FormData(form).entries());
+
+        try {
+          const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.error ?? 'Não foi possível cadastrar.');
+          }
+
+          localStorage.setItem('hostMonitorToken', result.token);
+          localStorage.setItem('hostMonitorUser', JSON.stringify(result.user));
+          window.location.href = '/dashboard.html';
+        } catch (error) {
+          feedback.textContent = error.message;
+        } finally {
+          submitButton.disabled = false;
+          submitButton.classList.remove('opacity-60', 'cursor-not-allowed');
+        }
+      });
+    </script>
+  </body>
+</html>

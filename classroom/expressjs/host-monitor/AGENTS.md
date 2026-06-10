@@ -50,10 +50,14 @@ prisma/
   docs/swagger.ts             # especificação OpenAPI
 test/
   api/hosts.routes.test.ts    # testes de integração da API
-  frontend/index.vitest.test.js
+  frontend/auth.vitest.test.js
+  frontend/dashboard.vitest.test.js
   frontend/host.vitest.test.js
 public/
-  index.html                  # listagem/cadastro de hosts
+  index.html                  # landing page pública
+  login.html                  # login de usuário
+  register.html               # cadastro de usuário
+  dashboard.html              # listagem/cadastro de hosts após login
   host.html                   # detalhes, histórico e gráfico de latência
 ```
 

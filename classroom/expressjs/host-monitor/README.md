@@ -29,6 +29,14 @@ Base da API:
 
 - `http://localhost:3000/api`
 
+Paginas:
+
+- `/`: landing page publica
+- `/register.html`: cadastro de usuario
+- `/login.html`: login de usuario
+- `/dashboard.html`: dashboard de hosts apos login
+- `/host.html?id=<id>`: detalhes do host apos login
+
 ## Build e Produção
 
 Gera Prisma Client e compila `src/**/*.ts` para `dist/**/*.js`:

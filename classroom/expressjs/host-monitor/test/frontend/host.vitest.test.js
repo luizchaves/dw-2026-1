@@ -8,6 +8,7 @@ import { JSDOM } from 'jsdom';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const htmlPath = resolve(__dirname, '../../public/host.html');
+const navbarPath = resolve(__dirname, '../../public/js/navbar.js');
 
 function createJsonResponse(body, ok = true, status = 200) {
   return {
@@ -111,6 +112,7 @@ function extractModuleScript(html) {
 
 async function bootstrapPage() {
   const html = readFileSync(htmlPath, 'utf8');
+  const navbarScript = readFileSync(navbarPath, 'utf8');
   const scriptContent = extractModuleScript(html);
   const dom = new JSDOM(html, {
     url: 'http://localhost:3000/host.html?id=h-1',
@@ -119,7 +121,17 @@ async function bootstrapPage() {
 
   const fetchMock = createFetchMock();
   dom.window.fetch = fetchMock;
+  dom.window.localStorage.setItem('hostMonitorToken', 'fake-token');
+  dom.window.localStorage.setItem(
+    'hostMonitorUser',
+    JSON.stringify({
+      id: 'u-1',
+      name: 'Maria Silva',
+      email: 'maria@example.com',
+    })
+  );
 
+  dom.window.eval(navbarScript);
   await dom.window.eval(`(async () => {${scriptContent}})()`);
 
   return { dom, fetchMock };
@@ -138,10 +150,13 @@ describe('public/host.html', () => {
       dom.window.document.getElementById('host-address').textContent;
     const uptime =
       dom.window.document.getElementById('host-uptime').textContent;
+    const userName =
+      dom.window.document.getElementById('user-name').textContent;
 
     assert.match(name, /Google DNS/);
     assert.match(address, /8\.8\.8\.8/);
     assert.match(uptime, /98\.50%/);
+    assert.match(userName, /Maria Silva/);
 
     const historyRows =
       dom.window.document.querySelectorAll('#history-table tr');
