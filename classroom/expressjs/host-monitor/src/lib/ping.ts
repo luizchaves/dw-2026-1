@@ -63,7 +63,7 @@ export function parse(output: string): Omit<PingResult, 'host'> {
   ping.ip = ipMatch[1];
 
   // packets
-  regex = /icmp_seq=(?<seq>\d+) ttl=(?<ttl>\d+) time=(?<time>[\d\.]+)/g;
+  regex = /(?:icmp_)?seq=(?<seq>\d+) ttl=(?<ttl>\d+) time=(?<time>[\d\.]+)/g;
   let packetMatch: RegExpExecArray | null;
   while ((packetMatch = regex.exec(output))) {
     const { seq, ttl, time } = requireGroups(
@@ -90,7 +90,7 @@ export function parse(output: string): Omit<PingResult, 'host'> {
   const losted = transmittedCount - receivedCount;
 
   regex =
-    /min\/avg\/max\/(stddev|mdev) = (?<min>[\d.]+)\/(?<avg>[\d.]+)\/(?<max>[\d.]+)\/(?<stddev>[\d.]+|nan)/;
+    /min\/avg\/max(?:\/(?:stddev|mdev))? = (?<min>[\d.]+)\/(?<avg>[\d.]+)\/(?<max>[\d.]+)(?:\/(?<stddev>[\d.]+|nan))?/;
   const { min, avg, max, stddev } = requireGroups(
     output.match(regex),
     'Invalid ping timing statistics'
