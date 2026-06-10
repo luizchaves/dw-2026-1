@@ -1,5 +1,27 @@
 @server=http://localhost:3000
 @createdHostId={{createHost.response.body.$.id}}
+@authToken={{loginUser.response.body.$.token}}
+
+### POST /api/auth/register
+POST {{server}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Maria Silva",
+  "email": "maria@example.com",
+  "password": "secret123",
+  "passwordConfirmation": "secret123"
+}
+
+### POST /api/auth/login
+# @name loginUser
+POST {{server}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "maria@example.com",
+  "password": "secret123"
+}
 
 ### POST /api/hosts
 # @name createHost

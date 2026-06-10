@@ -32,8 +32,11 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 src/
   index.ts                    # app Express e bootstrap HTTP (porta 3000)
   routes/hosts.route.ts       # rotas da API de hosts
+  routes/auth.route.ts        # rotas de cadastro/login de usuários
   controllers/hosts.controller.ts # handlers HTTP da API de hosts
+  controllers/auth.controller.ts # handlers HTTP de autenticação
   models/Hosts.ts             # regras de negócio, histórico e estatísticas
+  models/Users.ts             # cadastro, login, hash de senha e emissão JWT
   schemas/host.ts             # schemas de validação (zod)
   types.ts                    # contratos compartilhados da aplicação
   middleware/                 # validações e tratamento de erro
@@ -58,6 +61,8 @@ public/
 
 | Método | Rota                   | Descrição                                 |
 | ------ | ---------------------- | ----------------------------------------- |
+| POST   | /api/auth/register     | cadastra usuário e retorna JWT            |
+| POST   | /api/auth/login        | autentica usuário e retorna JWT           |
 | POST   | /api/hosts             | cria host e executa ping inicial          |
 | GET    | /api/hosts             | lista hosts                               |
 | GET    | /api/hosts/:id         | retorna host por id                       |

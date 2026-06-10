@@ -12,8 +12,97 @@ const swaggerSpec = {
       description: 'Servidor local',
     },
   ],
-  tags: [{ name: 'Hosts' }, { name: 'Ping' }, { name: 'History' }],
+  tags: [
+    { name: 'Auth' },
+    { name: 'Hosts' },
+    { name: 'Ping' },
+    { name: 'History' },
+  ],
   paths: {
+    '/api/auth/register': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Cadastra um novo usuario',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/RegisterRequest' },
+              example: {
+                name: 'Maria Silva',
+                email: 'maria@example.com',
+                password: 'secret123',
+                passwordConfirmation: 'secret123',
+              },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: 'Usuario cadastrado com sucesso',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/AuthResponse' },
+              },
+            },
+          },
+          400: {
+            description: 'Dados invalidos',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ErrorResponse' },
+              },
+            },
+          },
+          409: {
+            description: 'E-mail ja cadastrado',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ErrorResponse' },
+                example: { error: 'Email already registered' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/auth/login': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Autentica usuario e retorna JWT',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/LoginRequest' },
+              example: {
+                email: 'maria@example.com',
+                password: 'secret123',
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Login realizado com sucesso',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/AuthResponse' },
+              },
+            },
+          },
+          401: {
+            description: 'Credenciais invalidas',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ErrorResponse' },
+                example: { error: 'Invalid email or password' },
+              },
+            },
+          },
+        },
+      },
+    },
     '/api/hosts': {
       get: {
         tags: ['Hosts'],
@@ -328,6 +417,43 @@ const swaggerSpec = {
         required: ['error'],
         properties: {
           error: { type: 'string' },
+        },
+      },
+      RegisterRequest: {
+        type: 'object',
+        required: ['name', 'email', 'password', 'passwordConfirmation'],
+        properties: {
+          name: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          password: { type: 'string', minLength: 6 },
+          passwordConfirmation: { type: 'string', minLength: 6 },
+        },
+      },
+      LoginRequest: {
+        type: 'object',
+        required: ['email', 'password'],
+        properties: {
+          email: { type: 'string', format: 'email' },
+          password: { type: 'string' },
+        },
+      },
+      UserResponse: {
+        type: 'object',
+        required: ['id', 'name', 'email', 'createdAt', 'updatedAt'],
+        properties: {
+          id: { type: 'string' },
+          name: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          createdAt: { type: 'string' },
+          updatedAt: { type: 'string' },
+        },
+      },
+      AuthResponse: {
+        type: 'object',
+        required: ['user', 'token'],
+        properties: {
+          user: { $ref: '#/components/schemas/UserResponse' },
+          token: { type: 'string', description: 'JWT de acesso' },
         },
       },
       HostRequest: {

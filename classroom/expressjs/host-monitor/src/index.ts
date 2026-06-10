@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import { pathToFileURL } from 'node:url';
 import express from 'express';
 import morgan from 'morgan';
@@ -6,6 +8,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from '@/docs/swagger.js';
 import { pingAllHosts } from '@/jobs/pingHosts.js';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandlers.js';
+import authRoutes from '@/routes/auth.route.js';
 import hostRoutes from '@/routes/hosts.route.js';
 
 const port = 3000;
@@ -21,6 +24,7 @@ app.get('/api/docs.json', (req, res) => {
 });
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+app.use('/api', authRoutes);
 app.use('/api', hostRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);

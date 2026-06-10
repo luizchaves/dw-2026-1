@@ -57,6 +57,10 @@ Arquivos por ambiente:
 - development: `src/database/db.dev.sqlite`
 - production local compilado: `dist/database/db.sqlite`
 
+JWT:
+
+- `JWT_SECRET`: segredo usado para assinar tokens de cadastro/login.
+
 ## Testes
 
 Executa typecheck, testes de API e testes de frontend:
@@ -87,6 +91,8 @@ Especificacao OpenAPI em JSON:
 
 | Metodo | Rota                   | Descricao                                 |
 | ------ | ---------------------- | ----------------------------------------- |
+| POST   | /api/auth/register     | Cadastra usuario e retorna JWT            |
+| POST   | /api/auth/login        | Autentica usuario e retorna JWT           |
 | POST   | /api/hosts             | Cria host e executa ping inicial          |
 | GET    | /api/hosts             | Lista hosts                               |
 | GET    | /api/hosts/:id         | Retorna host por id                       |
