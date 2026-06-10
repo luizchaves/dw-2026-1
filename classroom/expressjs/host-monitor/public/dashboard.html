@@ -121,50 +121,13 @@
       <section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></section>
     </main>
     <script src="/js/navbar.js"></script>
+    <script src="/js/session.js"></script>
     <script type="module">
-      const authToken = localStorage.getItem('hostMonitorToken');
-      const authUser = JSON.parse(
-        localStorage.getItem('hostMonitorUser') ?? 'null'
-      );
-
-      if (!authToken) {
-        window.location.href = '/login.html';
-        throw new Error('Missing auth token');
-      }
-
-      HostMonitorNavbar.renderNavbar({
-        active: 'dashboard',
-        authenticated: true,
-        showUser: true,
-      });
-
-      const userName = document.getElementById('user-name');
-      const logoutButton = document.getElementById('logout-button');
-
-      if (authUser?.name) {
-        userName.textContent = authUser.name;
-        userName.classList.remove('hidden');
-      }
-
-      logoutButton.addEventListener('click', () => {
-        localStorage.removeItem('hostMonitorToken');
-        localStorage.removeItem('hostMonitorUser');
-        window.location.href = '/login.html';
-      });
-
-      function fetchWithAuth(url, options = {}) {
-        return fetch(url, {
-          ...options,
-          headers: {
-            ...(options.headers ?? {}),
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
-      }
+      HostMonitorSession.setupAuthenticatedNavbar({ active: 'dashboard' });
 
       async function fetchHosts() {
         try {
-          const response = await fetchWithAuth('/api/hosts');
+          const response = await HostMonitorSession.fetchWithAuth('/api/hosts');
           if (!response.ok) {
             throw new Error('Erro ao buscar hosts');
           }
@@ -310,9 +273,12 @@
         const card = deleteButton.closest('[data-id]');
         const hostId = card.getAttribute('data-id');
 
-        const response = await fetchWithAuth(`/api/hosts/${hostId}`, {
-          method: 'DELETE',
-        });
+        const response = await HostMonitorSession.fetchWithAuth(
+          `/api/hosts/${hostId}`,
+          {
+            method: 'DELETE',
+          }
+        );
 
         if (!response.ok) {
           console.error('Erro ao excluir host');
@@ -370,7 +336,7 @@
         const formDatam = new FormData(form);
         const newHost = Object.fromEntries(formDatam.entries());
 
-        const response = await fetchWithAuth('/api/hosts', {
+        const response = await HostMonitorSession.fetchWithAuth('/api/hosts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newHost),

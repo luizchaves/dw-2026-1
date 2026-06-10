@@ -136,12 +136,10 @@
     </main>
 
     <script src="/js/navbar.js"></script>
+    <script src="/js/session.js"></script>
     <script type="module">
       HostMonitorNavbar.renderNavbar({ theme: 'dark' });
-
-      if (localStorage.getItem('hostMonitorToken')) {
-        window.location.href = '/dashboard.html';
-      }
+      HostMonitorSession.redirectIfAuthenticated();
     </script>
   </body>
 </html>

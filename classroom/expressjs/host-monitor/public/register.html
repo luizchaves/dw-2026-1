@@ -103,46 +103,18 @@
     </main>
 
     <script src="/js/navbar.js"></script>
+    <script src="/js/session.js"></script>
+    <script src="/js/auth-form.js"></script>
     <script type="module">
       HostMonitorNavbar.renderNavbar({ active: 'register' });
+      HostMonitorSession.redirectIfAuthenticated();
 
-      if (localStorage.getItem('hostMonitorToken')) {
-        window.location.href = '/dashboard.html';
-      }
-
-      const form = document.getElementById('register-form');
-      const feedback = document.getElementById('register-feedback');
-      const submitButton = document.getElementById('register-submit');
-
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        feedback.textContent = '';
-        submitButton.disabled = true;
-        submitButton.classList.add('opacity-60', 'cursor-not-allowed');
-
-        const payload = Object.fromEntries(new FormData(form).entries());
-
-        try {
-          const response = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-          });
-          const result = await response.json();
-
-          if (!response.ok) {
-            throw new Error(result.error ?? 'Não foi possível cadastrar.');
-          }
-
-          localStorage.setItem('hostMonitorToken', result.token);
-          localStorage.setItem('hostMonitorUser', JSON.stringify(result.user));
-          window.location.href = '/dashboard.html';
-        } catch (error) {
-          feedback.textContent = error.message;
-        } finally {
-          submitButton.disabled = false;
-          submitButton.classList.remove('opacity-60', 'cursor-not-allowed');
-        }
+      HostMonitorAuthForm.initAuthForm({
+        endpoint: '/api/auth/register',
+        fallbackMessage: 'Não foi possível cadastrar.',
+        feedbackId: 'register-feedback',
+        formId: 'register-form',
+        submitButtonId: 'register-submit',
       });
     </script>
   </body>

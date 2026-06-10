@@ -188,45 +188,9 @@
     </main>
 
     <script src="/js/navbar.js"></script>
+    <script src="/js/session.js"></script>
     <script type="module">
-      const authToken = localStorage.getItem('hostMonitorToken');
-      const authUser = JSON.parse(
-        localStorage.getItem('hostMonitorUser') ?? 'null'
-      );
-
-      if (!authToken) {
-        window.location.href = '/login.html';
-        throw new Error('Missing auth token');
-      }
-
-      HostMonitorNavbar.renderNavbar({
-        active: 'host',
-        authenticated: true,
-        showUser: true,
-      });
-
-      const userName = document.getElementById('user-name');
-
-      if (authUser?.name) {
-        userName.textContent = authUser.name;
-        userName.classList.remove('hidden');
-      }
-
-      document.getElementById('logout-button').addEventListener('click', () => {
-        localStorage.removeItem('hostMonitorToken');
-        localStorage.removeItem('hostMonitorUser');
-        window.location.href = '/login.html';
-      });
-
-      function fetchWithAuth(url, options = {}) {
-        return fetch(url, {
-          ...options,
-          headers: {
-            ...(options.headers ?? {}),
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
-      }
+      HostMonitorSession.setupAuthenticatedNavbar({ active: 'host' });
 
       const hostName = document.getElementById('host-name');
       const hostAddress = document.getElementById('host-address');
@@ -420,7 +384,7 @@
       }
 
       async function loadDetails() {
-        const response = await fetchWithAuth(
+        const response = await HostMonitorSession.fetchWithAuth(
           `/api/hosts/${hostId}/details?limit=30`
         );
 
@@ -446,7 +410,7 @@
         pingFeedback.textContent = 'Executando ping...';
 
         try {
-          const response = await fetchWithAuth(
+          const response = await HostMonitorSession.fetchWithAuth(
             `/api/hosts/${hostId}/ping?count=${count}`
           );
           const result = await response.json();

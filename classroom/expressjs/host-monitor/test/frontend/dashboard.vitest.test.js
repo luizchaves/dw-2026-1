@@ -7,8 +7,8 @@ import { JSDOM } from 'jsdom';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const publicPath = resolve(__dirname, '../../public');
 const htmlPath = resolve(__dirname, '../../public/dashboard.html');
-const navbarPath = resolve(__dirname, '../../public/js/navbar.js');
 
 function createJsonResponse(body, ok = true, status = 200) {
   return {
@@ -61,9 +61,20 @@ function extractModuleScript(html) {
   return match[1];
 }
 
+function getExternalScripts(html) {
+  return [...html.matchAll(/<script src="([^"]+)"><\/script>/g)]
+    .map((match) => match[1])
+    .filter((src) => src.startsWith('/'))
+    .map((src) => readFileSync(resolve(publicPath, src.slice(1)), 'utf8'));
+}
+
+function evalExternalScripts(dom, scripts) {
+  scripts.forEach((script) => dom.window.eval(script));
+}
+
 async function bootstrapPage(initialHosts = []) {
   const html = readFileSync(htmlPath, 'utf8');
-  const navbarScript = readFileSync(navbarPath, 'utf8');
+  const externalScripts = getExternalScripts(html);
   const scriptContent = extractModuleScript(html);
   const dom = new JSDOM(html, {
     url: 'http://localhost:3000',
@@ -82,7 +93,7 @@ async function bootstrapPage(initialHosts = []) {
     })
   );
 
-  dom.window.eval(navbarScript);
+  evalExternalScripts(dom, externalScripts);
   await dom.window.eval(`(async () => {${scriptContent}})()`);
 
   return { dom, fetchMock };
@@ -218,7 +229,7 @@ describe('public/dashboard.html', () => {
 
   test('redireciona para login quando nao existe token', async () => {
     const html = readFileSync(htmlPath, 'utf8');
-    const navbarScript = readFileSync(navbarPath, 'utf8');
+    const externalScripts = getExternalScripts(html);
     const scriptContent = extractModuleScript(html);
     const dom = new JSDOM(html, {
       url: 'http://localhost:3000/dashboard.html',
@@ -226,7 +237,7 @@ describe('public/dashboard.html', () => {
     });
 
     dom.window.fetch = createFetchMock();
-    dom.window.eval(navbarScript);
+    evalExternalScripts(dom, externalScripts);
 
     await assert.rejects(
       () => dom.window.eval(`(async () => {${scriptContent}})()`),

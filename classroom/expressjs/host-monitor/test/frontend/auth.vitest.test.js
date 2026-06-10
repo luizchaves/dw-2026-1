@@ -7,7 +7,7 @@ import { JSDOM } from 'jsdom';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const navbarPath = resolve(__dirname, '../../public/js/navbar.js');
+const publicPath = resolve(__dirname, '../../public');
 
 function createJsonResponse(body, ok = true, status = 200) {
   return {
@@ -32,12 +32,22 @@ function extractModuleScript(html, fileName) {
 function readPublicPage(fileName) {
   const htmlPath = resolve(__dirname, `../../public/${fileName}`);
   const html = readFileSync(htmlPath, 'utf8');
+  const externalScripts = [
+    ...html.matchAll(/<script src="([^"]+)"><\/script>/g),
+  ]
+    .map((match) => match[1])
+    .filter((src) => src.startsWith('/'))
+    .map((src) => readFileSync(resolve(publicPath, src.slice(1)), 'utf8'));
 
   return {
     html,
-    navbarScript: readFileSync(navbarPath, 'utf8'),
+    externalScripts,
     scriptContent: extractModuleScript(html, fileName),
   };
+}
+
+function evalExternalScripts(dom, scripts) {
+  scripts.forEach((script) => dom.window.eval(script));
 }
 
 afterEach(() => {
@@ -46,13 +56,14 @@ afterEach(() => {
 
 describe('public auth pages', () => {
   test('landing page exibe links de login e cadastro', async () => {
-    const { html, navbarScript, scriptContent } = readPublicPage('index.html');
+    const { html, externalScripts, scriptContent } =
+      readPublicPage('index.html');
     const dom = new JSDOM(html, {
       url: 'http://localhost:3000/',
       runScripts: 'outside-only',
     });
 
-    dom.window.eval(navbarScript);
+    evalExternalScripts(dom, externalScripts);
     await dom.window.eval(`(async () => {${scriptContent}})()`);
 
     assert.ok(dom.window.document.querySelector('a[href="/login.html"]'));
@@ -63,7 +74,8 @@ describe('public auth pages', () => {
   });
 
   test('login salva token e usuario no localStorage', async () => {
-    const { html, navbarScript, scriptContent } = readPublicPage('login.html');
+    const { html, externalScripts, scriptContent } =
+      readPublicPage('login.html');
     const dom = new JSDOM(html, {
       url: 'http://localhost:3000/login.html',
       runScripts: 'outside-only',
@@ -79,7 +91,7 @@ describe('public auth pages', () => {
     });
 
     dom.window.fetch = fetchMock;
-    dom.window.eval(navbarScript);
+    evalExternalScripts(dom, externalScripts);
     await dom.window.eval(`(async () => {${scriptContent}})()`);
 
     const form = dom.window.document.getElementById('login-form');
@@ -106,7 +118,7 @@ describe('public auth pages', () => {
   });
 
   test('cadastro envia confirmacao de senha e salva token', async () => {
-    const { html, navbarScript, scriptContent } =
+    const { html, externalScripts, scriptContent } =
       readPublicPage('register.html');
     const dom = new JSDOM(html, {
       url: 'http://localhost:3000/register.html',
@@ -129,7 +141,7 @@ describe('public auth pages', () => {
     });
 
     dom.window.fetch = fetchMock;
-    dom.window.eval(navbarScript);
+    evalExternalScripts(dom, externalScripts);
     await dom.window.eval(`(async () => {${scriptContent}})()`);
 
     const form = dom.window.document.getElementById('register-form');
