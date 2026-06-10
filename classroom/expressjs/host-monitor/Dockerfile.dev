@@ -13,4 +13,4 @@ COPY public/ ./public
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npm run db:generate && npm run dev"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run db:generate && npm run dev"]
