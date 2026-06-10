@@ -7,7 +7,7 @@
     "start": "node dist/src/index.js",
     "dev": "tsx watch src/index.ts",
     "test": "npm run typecheck && npm run test:api && npm run test:front",
-    "test:api": "RUST_LOG=debug NODE_ENV=test npm run db:drop && NODE_ENV=test npm run db:seed && NODE_ENV=test node --import tsx --test test/api/*.test.ts",
+    "test:api": "RUST_LOG=debug NODE_ENV=test POSTGRES_HOST=localhost POSTGRES_DB=host_monitor_test npm run db:drop && NODE_ENV=test POSTGRES_HOST=localhost POSTGRES_DB=host_monitor_test npm run db:seed && NODE_ENV=test POSTGRES_HOST=localhost POSTGRES_DB=host_monitor_test node --import tsx --test test/api/*.test.ts",
     "test:front": "vitest run test/frontend",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
