@@ -11,12 +11,15 @@ import {
   removeHost,
   updateHost,
 } from '@/controllers/hosts.controller.js';
+import { requireAuth } from '@/middleware/requireAuth.js';
 import { requireJsonContentType } from '@/middleware/requireJsonContentType.js';
 import { validateRequest } from '@/middleware/validation.js';
 import { hostCreateSchema, hostUpdateSchema } from '@/schemas/host.js';
 
 const routes = express.Router();
 const idParamsSchema = z.object({ id: z.string() });
+
+routes.use(requireAuth);
 
 routes.post(
   '/hosts',

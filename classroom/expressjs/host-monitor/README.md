@@ -157,6 +157,8 @@ Durante desenvolvimento, troque os argumentos por `["run", "mcp:dev", "--silent"
 
 ## Endpoints
 
+As rotas de hosts exigem JWT valido no header `Authorization: Bearer <token>`.
+
 | Metodo | Rota                   | Descricao                                 |
 | ------ | ---------------------- | ----------------------------------------- |
 | POST   | /api/auth/register     | Cadastra usuario e retorna JWT            |

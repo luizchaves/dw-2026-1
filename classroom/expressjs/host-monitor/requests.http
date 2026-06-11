@@ -27,41 +27,72 @@ Content-Type: application/json
 # @name createHost
 POST {{server}}/api/hosts
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "New Host",
   "address": "192.168.0.99",
-  "category": "Produção",
-  "status": "Online",
-  "uptime": "—"
+  "category": "Produção"
 }
 
 ### GET /api/hosts
 GET {{server}}/api/hosts
+Authorization: Bearer {{authToken}}
+
+### GET /api/hosts without JWT
+GET {{server}}/api/hosts
+
+### GET /api/hosts with invalid JWT
+GET {{server}}/api/hosts
+Authorization: Bearer invalid-token
+
+### GET /api/hosts/{{createdHostId}}
+GET {{server}}/api/hosts/{{createdHostId}}
+Authorization: Bearer {{authToken}}
 
 ### PUT /api/hosts/{{createdHostId}}
 PUT {{server}}/api/hosts/{{createdHostId}}
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Other Host",
   "address": "192.168.0.91",
-  "category": "Produção",
-  "status": "Online",
-  "uptime": "—"
+  "category": "Produção"
 }
 
 ### DELETE /api/hosts/{{createdHostId}}
 DELETE {{server}}/api/hosts/{{createdHostId}}
+Authorization: Bearer {{authToken}}
 
 ### GET /api/hosts/{{createdHostId}}/ping?count=1
 GET {{server}}/api/hosts/{{createdHostId}}/ping?count=1
+Authorization: Bearer {{authToken}}
 
 ### GET /api/hosts/{{createdHostId}}/ping?count=3
 GET {{server}}/api/hosts/{{createdHostId}}/ping?count=3
+Authorization: Bearer {{authToken}}
 
 ### GET /api/hosts/{{createdHostId}}/ping
 GET {{server}}/api/hosts/{{createdHostId}}/ping
+Authorization: Bearer {{authToken}}
+
+### GET /api/hosts/{{createdHostId}}/details
+GET {{server}}/api/hosts/{{createdHostId}}/details
+Authorization: Bearer {{authToken}}
+
+### GET /api/hosts/{{createdHostId}}/details?limit=5
+GET {{server}}/api/hosts/{{createdHostId}}/details?limit=5
+Authorization: Bearer {{authToken}}
+
+### GET /api/hosts/{{createdHostId}}/history
+GET {{server}}/api/hosts/{{createdHostId}}/history
+Authorization: Bearer {{authToken}}
+
+### GET /api/hosts/{{createdHostId}}/history?limit=5
+GET {{server}}/api/hosts/{{createdHostId}}/history?limit=5
+Authorization: Bearer {{authToken}}
 
 ### GET /api/hosts/{{createdHostId}}/ping with unknown host
 GET {{server}}/api/hosts/cj1234567890abcdef123456/ping
+Authorization: Bearer {{authToken}}

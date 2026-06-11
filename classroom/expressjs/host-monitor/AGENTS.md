@@ -131,6 +131,7 @@ public/
 - Porta padrão da aplicação: 3000.
 - Documentação em `/api/docs` (Swagger UI) e `/api/docs.json` (OpenAPI JSON).
 - MCP via stdio em `src/mcp/server.ts`; usa `HOST_MONITOR_API_URL` (padrão `http://localhost:3000`) e `HOST_MONITOR_TOKEN` opcional para chamar a API Express.
+- Rotas `/api/hosts*` exigem JWT valido no header `Authorization: Bearer <token>`.
 - Status de host: `Unknown`, `Online`, `Offline`.
 - Uptime representa disponibilidade percentual (0-100) baseada no histórico.
 - Fluxo de frontend autenticado guarda `hostMonitorToken` e `hostMonitorUser` no `localStorage`.

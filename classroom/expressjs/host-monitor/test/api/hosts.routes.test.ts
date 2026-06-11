@@ -5,18 +5,69 @@ import request from 'supertest';
 import app from '@/index.js';
 import type { HostRecord } from '@/types.js';
 
+let userCounter = 0;
+
+async function createAuthHeader(): Promise<Record<string, string>> {
+  userCounter += 1;
+
+  const response = await request(app)
+    .post('/api/auth/register')
+    .set('Content-Type', 'application/json')
+    .send({
+      name: `Hosts Test User ${userCounter}`,
+      email: `hosts-${userCounter}@example.com`,
+      password: 'secret123',
+      passwordConfirmation: 'secret123',
+    });
+
+  assert.equal(response.status, 201);
+
+  return {
+    Authorization: `Bearer ${response.body.token}`,
+  };
+}
+
+async function createHost(
+  authHeader: Record<string, string>,
+  payload: { name: string; address: string; category: string }
+) {
+  return request(app)
+    .post('/api/hosts')
+    .set(authHeader)
+    .set('Content-Type', 'application/json')
+    .send(payload);
+}
+
 describe('/api/hosts', () => {
+  test('GET /api/hosts without valid JWT returns 401', async () => {
+    const response = await request(app).get('/api/hosts');
+
+    assert.equal(response.status, 401);
+    assert.deepEqual(response.body, {
+      error: 'Invalid or missing authorization token',
+    });
+  });
+
+  test('GET /api/hosts with invalid JWT returns 401', async () => {
+    const response = await request(app)
+      .get('/api/hosts')
+      .set('Authorization', 'Bearer invalid-token');
+
+    assert.equal(response.status, 401);
+    assert.deepEqual(response.body, {
+      error: 'Invalid or missing authorization token',
+    });
+  });
+
   test('POST /api/hosts with valid JSON returns 201', async () => {
+    const authHeader = await createAuthHeader();
     const hostPayload = {
       name: 'Server A',
       address: '127.0.0.1',
       category: 'Production',
     };
 
-    const response = await request(app)
-      .post('/api/hosts')
-      .set('Content-Type', 'application/json')
-      .send(hostPayload);
+    const response = await createHost(authHeader, hostPayload);
 
     assert.equal(response.status, 201);
     assert.equal(response.body.name, hostPayload.name);
@@ -29,18 +80,16 @@ describe('/api/hosts', () => {
   });
 
   test('GET /api/hosts/:id returns host details', async () => {
-    const createResponse = await request(app)
-      .post('/api/hosts')
-      .set('Content-Type', 'application/json')
-      .send({
-        name: 'Host Detail',
-        address: '127.0.0.1',
-        category: 'QA',
-      });
+    const authHeader = await createAuthHeader();
+    const createResponse = await createHost(authHeader, {
+      name: 'Host Detail',
+      address: '127.0.0.1',
+      category: 'QA',
+    });
 
-    const response = await request(app).get(
-      `/api/hosts/${createResponse.body.id}`
-    );
+    const response = await request(app)
+      .get(`/api/hosts/${createResponse.body.id}`)
+      .set(authHeader);
 
     assert.equal(response.status, 200);
     assert.equal(response.body.id, createResponse.body.id);
@@ -48,15 +97,18 @@ describe('/api/hosts', () => {
   });
 
   test('GET /api/hosts returns a list of hosts', async () => {
-    const response = await request(app).get('/api/hosts');
+    const authHeader = await createAuthHeader();
+    const response = await request(app).get('/api/hosts').set(authHeader);
 
     assert.equal(response.status, 200);
     assert.ok(Array.isArray(response.body));
   });
 
   test('POST /api/hosts without Content-Type application/json returns 400', async () => {
+    const authHeader = await createAuthHeader();
     const response = await request(app)
       .post('/api/hosts')
+      .set(authHeader)
       .set('Content-Type', 'text/plain')
       .send('name=Server A');
 
@@ -67,14 +119,12 @@ describe('/api/hosts', () => {
   });
 
   test('PUT /api/hosts/:id updates an existing host', async () => {
-    const createResponse = await request(app)
-      .post('/api/hosts')
-      .set('Content-Type', 'application/json')
-      .send({
-        name: 'Server B',
-        address: '127.0.0.1',
-        category: 'Staging',
-      });
+    const authHeader = await createAuthHeader();
+    const createResponse = await createHost(authHeader, {
+      name: 'Server B',
+      address: '127.0.0.1',
+      category: 'Staging',
+    });
 
     assert.equal(createResponse.status, 201);
 
@@ -86,6 +136,7 @@ describe('/api/hosts', () => {
 
     const response = await request(app)
       .put(`/api/hosts/${createResponse.body.id}`)
+      .set(authHeader)
       .set('Content-Type', 'application/json')
       .send(updatedPayload);
 
@@ -96,25 +147,23 @@ describe('/api/hosts', () => {
   });
 
   test('DELETE /api/hosts/:id removes a host and returns 204', async () => {
-    const createResponse = await request(app)
-      .post('/api/hosts')
-      .set('Content-Type', 'application/json')
-      .send({
-        name: 'Server C',
-        address: '127.0.0.1',
-        category: 'Development',
-      });
+    const authHeader = await createAuthHeader();
+    const createResponse = await createHost(authHeader, {
+      name: 'Server C',
+      address: '127.0.0.1',
+      category: 'Development',
+    });
 
     assert.equal(createResponse.status, 201);
 
-    const response = await request(app).delete(
-      `/api/hosts/${createResponse.body.id}`
-    );
+    const response = await request(app)
+      .delete(`/api/hosts/${createResponse.body.id}`)
+      .set(authHeader);
 
     assert.equal(response.status, 204);
     assert.deepEqual(response.body, {});
 
-    const listResponse = await request(app).get('/api/hosts');
+    const listResponse = await request(app).get('/api/hosts').set(authHeader);
 
     assert.equal(listResponse.status, 200);
     assert.equal(
@@ -126,8 +175,10 @@ describe('/api/hosts', () => {
   });
 
   test('PUT /api/hosts/:id for unknown host returns 400', async () => {
+    const authHeader = await createAuthHeader();
     const response = await request(app)
       .put('/api/hosts/cj1234567890abcdef123456')
+      .set(authHeader)
       .set('Content-Type', 'application/json')
       .send({
         name: 'Missing Host',
@@ -142,20 +193,18 @@ describe('/api/hosts', () => {
 
 describe('/api/hosts/:id/ping', () => {
   test('GET /api/hosts/:id/ping without count returns 200', async () => {
-    const createResponse = await request(app)
-      .post('/api/hosts')
-      .set('Content-Type', 'application/json')
-      .send({
-        name: 'Ping Host A',
-        address: '127.0.0.1',
-        category: 'Production',
-      });
+    const authHeader = await createAuthHeader();
+    const createResponse = await createHost(authHeader, {
+      name: 'Ping Host A',
+      address: '127.0.0.1',
+      category: 'Production',
+    });
 
     assert.equal(createResponse.status, 201);
 
-    const response = await request(app).get(
-      `/api/hosts/${createResponse.body.id}/ping`
-    );
+    const response = await request(app)
+      .get(`/api/hosts/${createResponse.body.id}/ping`)
+      .set(authHeader);
 
     assert.equal(response.status, 200);
     assert.equal(response.body.host, '127.0.0.1');
@@ -165,20 +214,18 @@ describe('/api/hosts/:id/ping', () => {
   });
 
   test('GET /api/hosts/:id/ping with count=1 returns 200', async () => {
-    const createResponse = await request(app)
-      .post('/api/hosts')
-      .set('Content-Type', 'application/json')
-      .send({
-        name: 'Ping Host B',
-        address: '127.0.0.1',
-        category: 'Production',
-      });
+    const authHeader = await createAuthHeader();
+    const createResponse = await createHost(authHeader, {
+      name: 'Ping Host B',
+      address: '127.0.0.1',
+      category: 'Production',
+    });
 
     assert.equal(createResponse.status, 201);
 
-    const response = await request(app).get(
-      `/api/hosts/${createResponse.body.id}/ping?count=1`
-    );
+    const response = await request(app)
+      .get(`/api/hosts/${createResponse.body.id}/ping?count=1`)
+      .set(authHeader);
 
     assert.equal(response.status, 200);
     assert.equal(response.body.host, '127.0.0.1');
@@ -189,20 +236,18 @@ describe('/api/hosts/:id/ping', () => {
   });
 
   test('GET /api/hosts/:id/ping with count=3 returns 200', async () => {
-    const createResponse = await request(app)
-      .post('/api/hosts')
-      .set('Content-Type', 'application/json')
-      .send({
-        name: 'Ping Host C',
-        address: '127.0.0.1',
-        category: 'Production',
-      });
+    const authHeader = await createAuthHeader();
+    const createResponse = await createHost(authHeader, {
+      name: 'Ping Host C',
+      address: '127.0.0.1',
+      category: 'Production',
+    });
 
     assert.equal(createResponse.status, 201);
 
-    const response = await request(app).get(
-      `/api/hosts/${createResponse.body.id}/ping?count=3`
-    );
+    const response = await request(app)
+      .get(`/api/hosts/${createResponse.body.id}/ping?count=3`)
+      .set(authHeader);
 
     assert.equal(response.status, 200);
     assert.equal(response.body.host, '127.0.0.1');
@@ -212,20 +257,20 @@ describe('/api/hosts/:id/ping', () => {
   });
 
   test('GET /api/hosts/:id/details returns host, history and statistics', async () => {
-    const createResponse = await request(app)
-      .post('/api/hosts')
-      .set('Content-Type', 'application/json')
-      .send({
-        name: 'Host Details Full',
-        address: '127.0.0.1',
-        category: 'Production',
-      });
+    const authHeader = await createAuthHeader();
+    const createResponse = await createHost(authHeader, {
+      name: 'Host Details Full',
+      address: '127.0.0.1',
+      category: 'Production',
+    });
 
     const hostId = createResponse.body.id;
 
-    await request(app).get(`/api/hosts/${hostId}/ping?count=1`);
+    await request(app).get(`/api/hosts/${hostId}/ping?count=1`).set(authHeader);
 
-    const response = await request(app).get(`/api/hosts/${hostId}/details`);
+    const response = await request(app)
+      .get(`/api/hosts/${hostId}/details`)
+      .set(authHeader);
 
     assert.equal(response.status, 200);
     assert.equal(response.body.host.id, hostId);
@@ -235,29 +280,28 @@ describe('/api/hosts/:id/ping', () => {
   });
 
   test('GET /api/hosts/:id/ping for unknown host returns 400', async () => {
-    const response = await request(app).get(
-      '/api/hosts/cj1234567890abcdef123456/ping'
-    );
+    const authHeader = await createAuthHeader();
+    const response = await request(app)
+      .get('/api/hosts/cj1234567890abcdef123456/ping')
+      .set(authHeader);
 
     assert.equal(response.status, 400);
     assert.deepEqual(response.body, { error: 'Host not found' });
   });
 
   test('GET /api/hosts/:id/ping for unreachable host returns 200 and marks offline', async () => {
-    const createResponse = await request(app)
-      .post('/api/hosts')
-      .set('Content-Type', 'application/json')
-      .send({
-        name: 'Unreachable Host',
-        address: 'unreachable.invalid',
-        category: 'Production',
-      });
+    const authHeader = await createAuthHeader();
+    const createResponse = await createHost(authHeader, {
+      name: 'Unreachable Host',
+      address: 'unreachable.invalid',
+      category: 'Production',
+    });
 
     assert.equal(createResponse.status, 201);
 
-    const response = await request(app).get(
-      `/api/hosts/${createResponse.body.id}/ping`
-    );
+    const response = await request(app)
+      .get(`/api/hosts/${createResponse.body.id}/ping`)
+      .set(authHeader);
 
     assert.equal(response.status, 200);
     assert.equal(response.body.reachable, false);

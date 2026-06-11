@@ -106,6 +106,7 @@ const swaggerSpec = {
     '/api/hosts': {
       get: {
         tags: ['Hosts'],
+        security: [{ bearerAuth: [] }],
         summary: 'Lista todos os hosts',
         responses: {
           200: {
@@ -134,6 +135,7 @@ const swaggerSpec = {
       },
       post: {
         tags: ['Hosts'],
+        security: [{ bearerAuth: [] }],
         summary: 'Cria um novo host',
         requestBody: {
           required: true,
@@ -203,6 +205,7 @@ const swaggerSpec = {
       ],
       get: {
         tags: ['Hosts'],
+        security: [{ bearerAuth: [] }],
         summary: 'Busca detalhes de um host pelo ID',
         responses: {
           200: {
@@ -226,6 +229,7 @@ const swaggerSpec = {
       },
       put: {
         tags: ['Hosts'],
+        security: [{ bearerAuth: [] }],
         summary: 'Atualiza um host existente',
         requestBody: {
           required: true,
@@ -280,6 +284,7 @@ const swaggerSpec = {
       },
       delete: {
         tags: ['Hosts'],
+        security: [{ bearerAuth: [] }],
         summary: 'Remove um host pelo ID',
         responses: {
           204: {
@@ -300,6 +305,7 @@ const swaggerSpec = {
     '/api/hosts/{id}/details': {
       get: {
         tags: ['History'],
+        security: [{ bearerAuth: [] }],
         summary: 'Retorna detalhes do host com histórico e estatísticas',
         parameters: [
           {
@@ -340,6 +346,7 @@ const swaggerSpec = {
     '/api/hosts/{id}/ping': {
       get: {
         tags: ['Ping'],
+        security: [{ bearerAuth: [] }],
         summary: 'Executa ping em um host existente',
         parameters: [
           {
@@ -404,6 +411,13 @@ const swaggerSpec = {
     },
   },
   components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+    },
     schemas: {
       MessageResponse: {
         type: 'object',
