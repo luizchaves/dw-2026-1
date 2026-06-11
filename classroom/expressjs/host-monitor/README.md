@@ -103,6 +103,58 @@ Especificacao OpenAPI em JSON:
 
 - `http://localhost:3000/api/docs.json`
 
+## MCP Host Monitor
+
+O projeto inclui um servidor MCP via stdio para clientes como Codex, Claude Code e outros hosts compatíveis com Model Context Protocol.
+
+Scripts:
+
+```bash
+npm run mcp:dev    # executa o MCP em TypeScript
+npm run build
+npm run mcp        # executa o MCP compilado em dist
+```
+
+Variaveis de ambiente:
+
+- `HOST_MONITOR_API_URL`: URL base da API Express. Padrao: `http://localhost:3000`.
+- `HOST_MONITOR_TOKEN`: JWT opcional usado nas chamadas para a API.
+
+Ferramentas MCP expostas:
+
+- `host_monitor_config`
+- `host_monitor_openapi`
+- `host_monitor_register`
+- `host_monitor_login`
+- `host_monitor_set_token`
+- `host_monitor_list_hosts`
+- `host_monitor_get_host`
+- `host_monitor_create_host`
+- `host_monitor_update_host`
+- `host_monitor_delete_host`
+- `host_monitor_ping_host`
+- `host_monitor_get_host_details`
+- `host_monitor_get_host_history`
+
+Exemplo de configuracao para clientes MCP:
+
+```json
+{
+  "mcpServers": {
+    "host-monitor": {
+      "command": "npm",
+      "args": ["run", "mcp", "--silent"],
+      "cwd": "/Users/lucachaves/code/subjects/dw-2026-1/classroom/expressjs/host-monitor",
+      "env": {
+        "HOST_MONITOR_API_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
+```
+
+Durante desenvolvimento, troque os argumentos por `["run", "mcp:dev", "--silent"]`. A API Express precisa estar em execucao (`npm run dev` ou `npm start`) para que as ferramentas MCP consigam consultar e alterar hosts.
+
 ## Endpoints
 
 | Metodo | Rota                   | Descricao                                 |

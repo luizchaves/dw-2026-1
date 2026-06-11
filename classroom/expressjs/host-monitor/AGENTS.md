@@ -9,6 +9,8 @@ npm install               # instalar dependências
 npm run dev               # desenvolvimento com hot reload
 npm run build             # gera Prisma Client, compila TypeScript para dist
 npm start                 # execução padrão a partir de dist
+npm run mcp:dev           # MCP host-monitor em TypeScript via stdio
+npm run mcp               # MCP host-monitor compilado em dist via stdio
 npm run typecheck         # gera Prisma Client e valida tipos sem emitir arquivos
 npm test                  # typecheck + testes de API + testes de frontend
 npm run test:api          # testes de API com NODE_ENV=test e banco de teste
@@ -38,11 +40,11 @@ docker compose -f docker-compose.prod.yml up --build  # produção
 
 Serviços disponíveis no Compose de desenvolvimento:
 
-| Serviço      | Container       | Porta              |
-| ------------ | --------------- | ------------------ |
-| API          | host-monitor    | `HOST_MONITOR_PORT` → 3000 |
-| PostgreSQL   | postgres        | `POSTGRES_PORT` → 5432    |
-| pgAdmin      | pgadmin         | 8080               |
+| Serviço    | Container    | Porta                      |
+| ---------- | ------------ | -------------------------- |
+| API        | host-monitor | `HOST_MONITOR_PORT` → 3000 |
+| PostgreSQL | postgres     | `POSTGRES_PORT` → 5432     |
+| pgAdmin    | pgadmin      | 8080                       |
 
 ## Estrutura relevante
 
@@ -75,6 +77,8 @@ src/
     database.ts                    # Prisma Client com adapter Postgres
   docs/
     swagger.ts                     # especificação OpenAPI
+  mcp/
+    server.ts                      # servidor MCP stdio que chama a API Express
   generated/
     prisma/                        # Prisma Client gerado (não editar manualmente)
 prisma/
@@ -126,6 +130,7 @@ public/
 - `app` exportado como default de `src/index.ts` para uso com supertest.
 - Porta padrão da aplicação: 3000.
 - Documentação em `/api/docs` (Swagger UI) e `/api/docs.json` (OpenAPI JSON).
+- MCP via stdio em `src/mcp/server.ts`; usa `HOST_MONITOR_API_URL` (padrão `http://localhost:3000`) e `HOST_MONITOR_TOKEN` opcional para chamar a API Express.
 - Status de host: `Unknown`, `Online`, `Offline`.
 - Uptime representa disponibilidade percentual (0-100) baseada no histórico.
 - Fluxo de frontend autenticado guarda `hostMonitorToken` e `hostMonitorUser` no `localStorage`.
